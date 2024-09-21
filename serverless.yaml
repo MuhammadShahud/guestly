@@ -1,0 +1,65 @@
+service: guestly-serverless-backend
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  # architecture: arm64
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-central-1'}
+  memorySize: 128
+  logRetentionInDays: 1
+  timeout: 15
+  # environment:
+  #   MONGODB_URI: ${file(./configs/config.${opt:stage, 'dev'}.json):MONGODB_URI}
+  #   DATABSE_PASSWORD: ${file(./configs/config.${opt:stage, 'dev'}.json):DATABSE_PASSWORD}
+  #   JWT_SECRET: ${file(./configs/config.${opt:stage, 'dev'}.json):JWT_SECRET}
+  #   JWT_EXPIRES_IN: ${file(./configs/config.${opt:stage, 'dev'}.json):JWT_EXPIRES_IN}
+  #   EMAIL_FROM: ${file(./configs/config.${opt:stage, 'dev'}.json):EMAIL_FROM}
+  #   SENDGRID_USERNAME: ${file(./configs/config.${opt:stage, 'dev'}.json):SENDGRID_USERNAME}
+  #   SENDGRID_PASSWORD: ${file(./configs/config.${opt:stage, 'dev'}.json):SENDGRID_PASSWORD}
+  #   STRIPE_WEBHOOK_SECRET: ${file(./configs/config.${opt:stage, 'dev'}.json):STRIPE_WEBHOOK_SECRET}
+  #   STRIPE_SUCCESS_URL: ${file(./configs/config.${opt:stage, 'dev'}.json):STRIPE_SUCCESS_URL}
+  #   STRIPE_CANCEL_URL: ${file(./configs/config.${opt:stage, 'dev'}.json):STRIPE_CANCEL_URL}
+
+  # iam:
+  #   role: arn:aws:iam::Y\ourAccountNumber:role/YourIamRole
+  # vpc:
+  #   securityGroupIds:
+  #     - sg-02a831befb9fc55a2
+  #   subnetIds:
+  #     - subnet-08ee32a2bc05e65c0
+  #     - subnet-02652bd6975ffa94a
+  #     - subnet-0a149e26a656f4abc
+
+functions:
+
+  main:
+    handler: dist/serverless.handler
+    events:
+      - http:
+          method: ANY
+          path: '{proxy+}'
+      - websocket:
+          route: $default
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+      - websocket:
+          route: 'join'
+
+plugins:
+  - serverless-jetpack
+  - serverless-offline
+
+
+custom:
+  webpack:
+    includeModules: true # enable auto-packing of external modules
+
+package:
+  patterns:
+    - '**'
+    - '!screenshots/**'
+    - '!test/**'
+    - '!package-lock.json'

@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - npm install -g serverless
+      - npm install --save-dev serverless-jetpack serverless-offline
+
+  post_build:
+    commands:
+      - serverless deploy --stage dev --region 'eu-central-1'
+
+cache:
+  paths:
+    - node_modules/

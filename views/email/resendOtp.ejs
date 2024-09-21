@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Email</title>
+    <style>
+      /* Add your CSS styles here */
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <img src="https://yourcompany.com/logo.png" alt="Company Logo" />
+      </div>
+      <h1>One Time Password (OTP) Request</h1>
+      <p>Dear <%= user.name %>,</p>
+      <p>
+        You have requested a One Time Password (OTP) to access your account.
+      </p>
+      <p>Your OTP is: <strong><%= otp %></strong></p>
+      <p>
+        Please use this OTP to complete your action within the specified
+        timeframe.
+      </p>
+      <p>If you did not make this request, please ignore this email.</p>
+      <p>Best regards,</p>
+      <p>The Team at Your Company</p>
+    </div>
+  </body>
+</html>
