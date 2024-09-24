@@ -18,7 +18,7 @@ import { AuthDecorator } from 'src/common/decorators/auth-decorater';
 import { USER_ROLE } from 'src/auth/enums/enums';
 import { GetUser } from 'src/common/decorators/user.decorater';
 import { IUser } from 'src/user/interfaces/user.interface';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { SwaggerDecorator } from 'src/common/decorators/api-decorater';
 import { pagination } from 'src/common/interface/pagination';
 
@@ -70,6 +70,7 @@ export class ContactSegmentsController {
   }
 
   @Post('get-filtered-records')
+  @ApiBody({ type: CreateContactSegmentDto })
   async getContactsForSegements(
     @Body() filters: Partial<CreateContactSegmentDto>,
   ) {

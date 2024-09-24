@@ -32,6 +32,7 @@ import { ChatModule } from './chat/chat.module';
 import { UtilsWhatsAppService } from './utils/utils.whatsapp';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { S3Storage } from './utils/utils.s3';
+import { TemplatesModule } from './templates/templates.module';
 
 const envFilePath: string = join(
   __dirname,
@@ -67,6 +68,7 @@ console.log(envFilePath);
     ContactSegmentsModule,
     ChatModule,
     WhatsappModule,
+    TemplatesModule,
   ],
   controllers: [AppController],
   providers: [

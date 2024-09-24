@@ -24,7 +24,7 @@ export class ContactSegmentsService {
     @InjectModel('ContactSegment')
     private readonly contactSegmentModel: Model<IContactSegment>,
     private readonly contactService: ContactsService,
-  ) { }
+  ) {}
   async create(createContactSegmentDto: CreateContactSegmentDto, user: IUser) {
     const result = await this.contactSegmentModel.create({
       ...createContactSegmentDto,
@@ -39,7 +39,7 @@ export class ContactSegmentsService {
         orArray[index]['$and'].push(query);
       });
     });
-    console.log(orArray)
+    console.log(orArray);
     return result;
   }
 
@@ -102,36 +102,35 @@ export class ContactSegmentsService {
   }
 
   queryBuilder(attribute: string, operator: string, value: string) {
-
-    if (operator === "month is") {
-      const numericMonth = monthValue[`${value}`]
+    if (operator === 'month is') {
+      const numericMonth = monthValue[`${value}`];
       const mongocondtion = {
         $expr: {
-          $eq: [{ $month: '$birthDate' }, numericMonth]
-        }
-      }
-      return mongocondtion
+          $eq: [{ $month: '$birthDate' }, numericMonth],
+        },
+      };
+      return mongocondtion;
     }
 
-    if (operator === "day is") {
+    if (operator === 'day is') {
       const mongocondtion = {
         $expr: {
-          $eq: [{ $dayOfMonth: '$birthDate' }, +value]
-        }
-
-      }
-      return mongocondtion
+          $eq: [{ $dayOfMonth: '$birthDate' }, +value],
+        },
+      };
+      return mongocondtion;
     }
 
-
-    if (operator === "contains") {
-      const mongocondtion = { [attribute]: { $regex: value, $options: "i" } }
-      return mongocondtion
+    if (operator === 'contains') {
+      const mongocondtion = { [attribute]: { $regex: value, $options: 'i' } };
+      return mongocondtion;
     }
 
-    if (operator === "does not contain") {
-      const mongocondtion = { [attribute]: { $not: { $regex: value, $options: "i" } } }
-      return mongocondtion
+    if (operator === 'does not contain') {
+      const mongocondtion = {
+        [attribute]: { $not: { $regex: value, $options: 'i' } },
+      };
+      return mongocondtion;
     }
 
     const mongoOperator = this.operatorSelector(operator);
@@ -146,9 +145,21 @@ export class ContactSegmentsService {
       };
       return mongocondtion;
     }
+
+    if (mongoOperator == '$eq') {
+      const mongocondtion = {
+        $or: [
+          { [attribute]: { $regex: value, $options: 'i' } },
+          { [attribute]: { [mongoOperator]: value } },
+        ],
+      };
+      return mongocondtion;
+    }
+
     const mongocondtion = {
       [attribute]: { [mongoOperator]: value },
     };
+    console.log(mongocondtion, '=========');
     return mongocondtion;
   }
 
@@ -201,7 +212,7 @@ export class ContactSegmentsService {
         orArray[index]['$and'].push(query);
       });
     });
-    console.log(orArray, "this is the or array")
+    console.log(orArray, 'this is the or array');
     const result = await this.contactService.getContactForSegment(orArray);
     console.log('this is result', result);
     return result;
