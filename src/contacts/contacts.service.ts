@@ -177,7 +177,7 @@ export class ContactsService {
     return { data };
   }
 
-  async getContactForSegment(query) {
+  async getContactForSegment(query, matchQuery = {}) {
     const pipeLine = [
       {
         $lookup: {
@@ -197,10 +197,12 @@ export class ContactsService {
       },
       {
         $match: {
+          ...matchQuery,
           $or: query,
         },
       },
     ];
+    console.log(JSON.stringify(pipeLine));
 
     const result = await this.Contact.aggregate([
       {

@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { ContactSegmentsService } from './contact-segments.service';
 import {
@@ -21,6 +23,7 @@ import { IUser } from 'src/user/interfaces/user.interface';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { SwaggerDecorator } from 'src/common/decorators/api-decorater';
 import { pagination } from 'src/common/interface/pagination';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Contats')
 @Controller('contact-segments')
@@ -71,11 +74,16 @@ export class ContactSegmentsController {
 
   @Post('get-filtered-records')
   @ApiBody({ type: CreateContactSegmentDto })
+  @UseGuards(AuthGuard())
   async getContactsForSegements(
     @Body() filters: Partial<CreateContactSegmentDto>,
+    @GetUser() user: IUser,
   ) {
     console.log('it was in the controller');
-    return await this.contactSegmentsService.getContactsForSegements(filters);
+    return await this.contactSegmentsService.getContactsForSegements(
+      filters,
+      user,
+    );
   }
 
   @Delete(':id')

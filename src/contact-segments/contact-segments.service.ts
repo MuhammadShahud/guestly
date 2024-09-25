@@ -12,7 +12,7 @@ import {
 import { UpdateContactSegmentDto } from './dto/update-contact-segment.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { IContactSegment } from './interface/contact-segment.interface';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { IUser } from 'src/user/interfaces/user.interface';
 import { pagination } from 'src/common/interface/pagination';
 import { _pagination, monthValue } from 'src/utils/utils.helper';
@@ -182,9 +182,10 @@ export class ContactSegmentsService {
     }
   }
 
-  async getContactsForSegements(filters: Partial<CreateContactSegmentDto>) {
-    console.log('it came here');
-    console.log(filters);
+  async getContactsForSegements(
+    filters: Partial<CreateContactSegmentDto>,
+    user,
+  ) {
     const orArray = [];
     filters.conditions.forEach((condition, index) => {
       orArray.push({ ['$and']: [] });
@@ -194,9 +195,12 @@ export class ContactSegmentsService {
         orArray[index]['$and'].push(query);
       });
     });
-    console.log('this is or Array', orArray);
-    const result = await this.contactService.getContactForSegment(orArray);
-    console.log('this is result', result);
+    const business_id = new mongoose.Types.ObjectId(user?.currentBuisness.id);
+
+    const result = await this.contactService.getContactForSegment(orArray, {
+      buisness: business_id,
+    });
+
     return result;
   }
 
