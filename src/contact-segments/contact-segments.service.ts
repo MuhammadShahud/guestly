@@ -28,7 +28,7 @@ export class ContactSegmentsService {
   async create(createContactSegmentDto: CreateContactSegmentDto, user: IUser) {
     const result = await this.contactSegmentModel.create({
       ...createContactSegmentDto,
-      business: user.currentBuisness._id,
+      business: user?.currentBuisness.id,
     });
     let orArray = [];
     createContactSegmentDto.conditions.forEach((condition, index) => {
@@ -52,7 +52,7 @@ export class ContactSegmentsService {
       ...(search && {
         name: { $regex: search, $options: 'i' },
       }),
-      business: user.currentBuisness,
+      business: user.currentBuisness._id,
     };
 
     const [result, segmentCount, totalCount] = await Promise.all([
@@ -159,7 +159,7 @@ export class ContactSegmentsService {
     const mongocondtion = {
       [attribute]: { [mongoOperator]: value },
     };
-    console.log(mongocondtion, '=========');
+    // console.log(mongocondtion, '=========');
     return mongocondtion;
   }
 
@@ -184,7 +184,7 @@ export class ContactSegmentsService {
 
   async getContactsForSegements(
     filters: Partial<CreateContactSegmentDto>,
-    user,
+    user: IUser,
   ) {
     const orArray = [];
     filters.conditions.forEach((condition, index) => {
@@ -206,7 +206,7 @@ export class ContactSegmentsService {
 
   async getContactsBySegementId(segmentId: string, user: IUser) {
     const segment = await this.contactSegmentModel.findById(segmentId);
-    console.log('this is segment', segment);
+    // console.log('this is segment', segment);
     const orArray = [];
     segment.conditions.forEach((condition, index) => {
       orArray.push({ ['$and']: [] });
@@ -216,9 +216,12 @@ export class ContactSegmentsService {
         orArray[index]['$and'].push(query);
       });
     });
-    console.log(orArray, 'this is the or array');
-    const result = await this.contactService.getContactForSegment(orArray);
-    console.log('this is result', result);
+    const business_id = new mongoose.Types.ObjectId(user?.currentBuisness.id);
+    // console.log(orArray, 'this is the or array', business_id);
+    const result = await this.contactService.getContactForSegment(orArray, {
+      buisness: business_id,
+    });
+    // console.log('this is result', result);
     return result;
   }
 }

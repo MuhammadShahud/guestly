@@ -13,6 +13,7 @@ import {
   TemplateContentTypeEnum,
   TemplateStatusEnum,
 } from '../enums/template.enum';
+import { IsTemplateButtonsArray } from '../validator/buttons.validator';
 
 class TemplateHeaderDto {
   @ApiProperty({
@@ -139,6 +140,10 @@ export class CreateTemplateDto {
     type: [TemplateButtonDto],
   })
   @IsOptional()
+  @IsTemplateButtonsArray({
+    message:
+      'Only one object of each type and only one of QUICK_REPLY or CALL_TO_ACTION can exist in the buttons array.',
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TemplateButtonDto)
@@ -150,7 +155,7 @@ export class CreateTemplateDto {
   })
   @IsOptional()
   @IsString()
-  readonly user_id?: string;
+  readonly business?: string;
 
   @ApiProperty({
     example: 'PENDING',

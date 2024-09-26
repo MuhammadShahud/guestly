@@ -37,12 +37,18 @@ const TemplateButtons = new Schema(
     },
     text: {
       type: String,
-      required: [true, 'text content is required'],
+      required: function () {
+        return this.type === TemplateButtonTypeEnum.CALL_TO_ACTION;
+      },
     },
     value: {
       type: String,
       required: function () {
-        return this.type === 'PHONE_NUMBER' || this.type === 'URL';
+        return (
+          this.type === TemplateButtonTypeEnum.PHONE_NUMBER ||
+          this.type === TemplateButtonTypeEnum.URL ||
+          this.type === TemplateButtonTypeEnum.CALL_TO_ACTION
+        );
       },
     },
   },
@@ -102,10 +108,10 @@ const TemplateSchema = new Schema(
       type: [TemplateButtons],
       default: [],
     },
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    business: {
+      type: Schema.Types.ObjectId,
+      ref: 'Buisness',
+      required: [true, 'business id are required'],
     },
     status: {
       type: String,

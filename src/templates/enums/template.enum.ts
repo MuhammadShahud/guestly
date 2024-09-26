@@ -14,6 +14,7 @@ export enum TemplateButtonTypeEnum {
   PHONE_NUMBER = 'PHONE_NUMBER',
   URL = 'URL',
   QUICK_REPLY = 'QUICK_REPLY',
+  CALL_TO_ACTION = 'CALL_TO_ACTION',
 }
 
 export enum TemplateStatusEnum {

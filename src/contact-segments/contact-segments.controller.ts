@@ -9,6 +9,7 @@ import {
   Query,
   Request,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ContactSegmentsService } from './contact-segments.service';
 import {
@@ -25,7 +26,7 @@ import { SwaggerDecorator } from 'src/common/decorators/api-decorater';
 import { pagination } from 'src/common/interface/pagination';
 import { AuthGuard } from '@nestjs/passport';
 
-@ApiTags('Contats')
+@ApiTags('Contact Segments')
 @Controller('contact-segments')
 export class ContactSegmentsController {
   constructor(
@@ -62,10 +63,12 @@ export class ContactSegmentsController {
   }
 
   @Get('get-contacts-by-Id/:segmentId')
+  @UseGuards(AuthGuard())
   async getContactsBySegementId(
     @Param('segmentId') segmentId: string,
     @GetUser() user: IUser,
   ) {
+    console.log(user, 'user');
     return await this.contactSegmentsService.getContactsBySegementId(
       segmentId,
       user,
@@ -79,7 +82,8 @@ export class ContactSegmentsController {
     @Body() filters: Partial<CreateContactSegmentDto>,
     @GetUser() user: IUser,
   ) {
-    console.log('it was in the controller');
+    console.log(user, 'user');
+    // console.log('it was in the controller');
     return await this.contactSegmentsService.getContactsForSegements(
       filters,
       user,
