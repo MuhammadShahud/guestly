@@ -50,7 +50,7 @@ export class UserService {
     private readonly appConfigService: AppConfigService,
     private readonly s3Storage: S3Storage,
     private readonly toolsIntegrationsService: ToolsIntegrationsService,
-  ) { }
+  ) {}
 
   // =================== HELPER SERVICES ======================
   async validateOtp(code: number, user: IUser): Promise<void> {
@@ -416,12 +416,12 @@ export class UserService {
   }
 
   async getCode(code: string) {
-    const redirect_uri = this.configService.get<string>('FB_REDIRECT_URI')
+    const redirect_uri = this.configService.get<string>('FB_REDIRECT_URI');
     const apiUrl = 'https://graph.facebook.com/v12.0/oauth/access_token';
     const params = {
       client_id: '218446344509498',
       ...(!!redirect_uri && {
-        redirect_uri: redirect_uri
+        redirect_uri: redirect_uri,
       }),
       client_secret: 'd37ea20b0f44da5d222ab60d7b0b7eb8',
       code,
@@ -438,9 +438,6 @@ export class UserService {
         code: 'bad_request',
       });
     console.log('RESPONSE', response);
-    //TODO this is temp work the token will come from above response
-    const token =
-      'EAADGrQDEWDoBO5InuKSdbMaxIsiARZBEiAHQj2pZCwqODBloVvpOy4uGoXwgiVXUsEMcf9ZB1HSUtffljMEQPvUhYne9KOFANPpjtDJTEyqYMRGkbuNFRsbIvEZBZC6gw4bhdqXLl0gyaRhoZBm3uQurwU4a89kBFT6V3ZCBtfeZBwcoCNzYLbJhjtaEGxGWhcpdpHnwZBiZAZCaZAewgGarMtdHpZACJAa6NyEmWGZBEZD';
 
     return { response };
   }
@@ -838,7 +835,7 @@ export class UserService {
   }
 
   async deleteInvitedUser(userId: string, admin: IUser) {
-    console.log(userId)
+    console.log(userId);
     const _user = await this.User.findById(userId);
 
     if (!_user) throw new BadRequestException('No user found');
@@ -846,9 +843,9 @@ export class UserService {
     const data = await this.buisnessService.addOrDeleteUser(_user, admin);
 
     const removedRole = _user.role.find(
-      (role) => role.buisness.toString() == admin.currentBuisness._id.toString()
+      (role) =>
+        role.buisness.toString() == admin.currentBuisness._id.toString(),
     );
-
 
     const updatedUser = await this.User.findOneAndUpdate(
       { _id: _user.id },
@@ -857,24 +854,28 @@ export class UserService {
           role: { buisness: removedRole.buisness },
         },
       },
-      { new: true }
+      { new: true },
     );
-    let updateObj = {}
+    let updateObj = {};
     if (updatedUser.role.length > 0) {
-
-      await this.User.findOneAndUpdate({ _id: _user._id }, {
-        currentBuisness: updatedUser.role[0].buisness,
-        currentOrganization: updatedUser.role[0].organization,
-      })
+      await this.User.findOneAndUpdate(
+        { _id: _user._id },
+        {
+          currentBuisness: updatedUser.role[0].buisness,
+          currentOrganization: updatedUser.role[0].organization,
+        },
+      );
     } else {
-      await this.User.findOneAndUpdate({ _id: _user._id }, {
-        currentBuisness: null,
-        currentOrganization: null,
-        role: [],
-        organization: []
-      })
+      await this.User.findOneAndUpdate(
+        { _id: _user._id },
+        {
+          currentBuisness: null,
+          currentOrganization: null,
+          role: [],
+          organization: [],
+        },
+      );
     }
-
 
     return { data };
   }
@@ -1009,7 +1010,7 @@ export class UserService {
   }
 
   async getMetaWhatsappAccId(token: string, user: IUser) {
-    console.log('token', token);
+    console.log('===========getMetaWhatsappAccId', token);
     const metabusinessId = this.configService.get(
       'GUESTLY_FACEBOOK_BUSINESS_ID',
     );
@@ -1017,38 +1018,67 @@ export class UserService {
     const params = {
       access_token: token,
     };
-    const apiUrl = `${graphApiUrl}/${metabusinessId}/owned_whatsapp_business_accounts`;
+    const apiUrl = `${graphApiUrl}/${metabusinessId}/client_whatsapp_business_accounts`;
     console.log(apiUrl);
     const [error, response] = await this.apiService.getApi(
       apiUrl,
-      null,
+      { Authorization: `Bearer ${token}` },
       params,
     );
+    if (response['data'].length <= 0) {
+      throw new NotFoundException('NO business found');
+    }
     if (error) {
-      console.log(error)
+      console.log(error);
       throw new NotFoundException('no data found against this token');
     }
-    const fetchWhatsappNumber = await this.getWhatsappNumber(response['data'][0]?.id, token, graphApiUrl)
-    const whatsAppProfileDetails = await this.getWhatsAppProfileDetails(fetchWhatsappNumber['data'][0].id, token, graphApiUrl)
+
+    const WA_business = response['data'][0];
+
+    const fetchWhatsappNumber = await this.getWhatsappNumber(
+      WA_business?.id,
+      token,
+      graphApiUrl,
+    );
+
+    const WA_number = fetchWhatsappNumber['data'][0];
+
+    const whatsAppProfileDetails = await this.getWhatsAppProfileDetails(
+      WA_number?.id,
+      token,
+      graphApiUrl,
+    );
+
+    const WA_profile = whatsAppProfileDetails['data'][0];
+
+    const WA_obj = {
+      whatappAccountId: WA_business.id,
+      phoneNumber: WA_number.display_phone_number,
+      codeVerificationStatus: WA_number.code_verification_status,
+      qualityRating: WA_number.quality_rating,
+      phoneNumberId: WA_number.id,
+      logo: WA_profile['profile_picture_url'],
+      description: WA_profile['description'],
+      address: WA_profile['address'],
+      website: WA_profile['websites'],
+      category: WA_profile['vertical'],
+    };
+    console.log(WA_obj, '===================WA_obj');
+
+    console.log(user.currentBuisness.id, '==============currentBuisness._id');
 
     await this.toolsIntegrationsService.updateTandI(
-      { buisness: user.currentBuisness._id },
+      { buisness: user.currentBuisness.id },
       {
         $set: {
-          whatsapp: {
-            whatappAccountId: response['data'][0].id,
-            phoneNumber: fetchWhatsappNumber['data'][0].display_phone_number,
-            codeVerificationStatus: fetchWhatsappNumber['data'][0].code_verification_status,
-            qualityRating: fetchWhatsappNumber['data'][0].quality_rating,
-            phoneNumberId: fetchWhatsappNumber['data'][0].id,
-            logo: whatsAppProfileDetails['data'][0]['profile_picture_url'],
-            description: whatsAppProfileDetails['data'][0]['description'],
-            address: whatsAppProfileDetails['data'][0]['address'],
-            website: whatsAppProfileDetails['data'][0]['websites'],
-            category: whatsAppProfileDetails['data'][0]['vertical'],
-          },
+          whatsapp: WA_obj,
         },
       },
+    );
+
+    await this.buisnessService.updateBuisnessHelper(
+      { _id: user.currentBuisness.id },
+      { whatsappConfigured: true },
     );
 
     return {
@@ -1057,13 +1087,15 @@ export class UserService {
     };
   }
 
+  async updateOwnerWhatsappProfile(
+    updateWhatsappProfileDto: UpdateWhatsappProfileDto,
+  ) {}
 
-  async updateOwnerWhatsappProfile(updateWhatsappProfileDto: UpdateWhatsappProfileDto) {
-
-  }
-
-
-  async getWhatsappNumber(whatsappAccId: string, token: string, graphApiUrl: string) {
+  async getWhatsappNumber(
+    whatsappAccId: string,
+    token: string,
+    graphApiUrl: string,
+  ) {
     const params = {
       access_token: token,
     };
@@ -1071,33 +1103,35 @@ export class UserService {
     console.log(apiUrl);
     const [error, response] = await this.apiService.getApi(
       apiUrl,
-      null,
+      { Authorization: `Bearer ${token}` },
       params,
     );
     if (error) {
-      return undefined
+      return undefined;
     }
-    console.log(response['data'][0].display_phone_number)
-    return response
+    console.log(response['data'][0].display_phone_number);
+    return response;
   }
 
-
-  async getWhatsAppProfileDetails(phoneNumberId: string, token: string, graphApiUrl: string) {
+  async getWhatsAppProfileDetails(
+    phoneNumberId: string,
+    token: string,
+    graphApiUrl: string,
+  ) {
     const params = {
       access_token: token,
     };
     const apiUrl = `${graphApiUrl}/${phoneNumberId}/whatsapp_business_profile?fields=address,description,profile_picture_url,websites,vertical`;
     const [error, response] = await this.apiService.getApi(
       apiUrl,
-      null,
+      { Authorization: `Bearer ${token}` },
       params,
     );
     if (error) {
-      return undefined
+      return undefined;
     }
-    console.log(response['data'])
-    return response
-
+    console.log(response['data']);
+    return response;
   }
   // async mailerLite() {
   //   const mailerlite = new MailerLite({

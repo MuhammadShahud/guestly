@@ -125,11 +125,13 @@ export class UserController {
   @AuthDecorator(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN)
   @Get('/whatsapp/:code')
   async getCode(@Param('code') code: string, @GetUser() user: IUser) {
+    console.log(code, '=============');
     const codeResponse = await this.userService.getCode(code);
-    console.log(codeResponse);
-    return {};
-    // return await this.userService.getMetaWhatsappAccId(codeResponse?.response?.access_token, user);
-    // return codeResponse
+
+    return await this.userService.getMetaWhatsappAccId(
+      codeResponse?.response['access_token'],
+      user,
+    );
   }
 
   @ApiExcludeEndpoint()

@@ -30,7 +30,6 @@ export class ApiService {
       const response: AxiosResponse<T> = await axios.get(apiUrl, {
         params,
       });
-      console.log(response);
       return [null, response.data];
     } catch (error) {
       console.log(error.message);
