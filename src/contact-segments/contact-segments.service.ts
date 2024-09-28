@@ -146,7 +146,13 @@ export class ContactSegmentsService {
       return mongocondtion;
     }
 
+    const exactMatchAttr = ['gender'];
+
     if (mongoOperator == '$eq') {
+      if (exactMatchAttr.includes(attribute)) {
+        return { [attribute]: { [mongoOperator]: value } };
+      }
+
       const mongocondtion = {
         $or: [
           { [attribute]: { $regex: value, $options: 'i' } },

@@ -419,11 +419,11 @@ export class UserService {
     const redirect_uri = this.configService.get<string>('FB_REDIRECT_URI');
     const apiUrl = 'https://graph.facebook.com/v12.0/oauth/access_token';
     const params = {
-      client_id: '218446344509498',
+      client_id: process.env.META_APP_ID,
       ...(!!redirect_uri && {
         redirect_uri: redirect_uri,
       }),
-      client_secret: 'd37ea20b0f44da5d222ab60d7b0b7eb8',
+      client_secret: process.env.META_APP_SECRET,
       code,
     };
     const [error, response] = await this.apiService.getApi(
