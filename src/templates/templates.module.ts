@@ -12,5 +12,6 @@ import { TemplateSchema } from './templates.entity';
   ],
   providers: [TemplateService],
   controllers: [TemplateController],
+  exports: [TemplateService],
 })
 export class TemplatesModule {}

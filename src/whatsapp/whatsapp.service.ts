@@ -77,11 +77,11 @@ export class WhatsappService {
               });
             }
 
-
             // Retrieve business information
-            const _business = await this.organizationervice.organizationHelperFn({
-              buisness: {$in : [business.buisness]},
-            });
+            const _business =
+              await this.organizationervice.organizationHelperFn({
+                buisness: { $in: [business.buisness] },
+              });
 
             // Initialize chat room
             const room = await this.chatService.initializeChat(

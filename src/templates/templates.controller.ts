@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,6 +14,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
@@ -38,16 +40,46 @@ export class TemplateController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all templates' })
+  @ApiOperation({
+    summary: 'Get all templates with optional filters and pagination',
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of templates',
-    type: Promise<ITemplate[]>,
+    description: 'List of templates with pagination',
   })
-  findAll() {
-    return this.templateService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    type: String,
+    example: 'Welcome Template',
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    type: String,
+    example: 'Marketing',
+  })
+  @ApiQuery({ name: 'language', required: false, type: String, example: 'en' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    example: 'PENDING',
+  })
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query() filters: any,
+  ): Promise<{
+    data: ITemplate[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return this.templateService.findAll(filters, page, limit);
   }
-
   @Get(':id')
   @ApiOperation({ summary: 'Get a template by ID' })
   @ApiParam({ name: 'id', required: true, description: 'Template ID' })

@@ -33,6 +33,11 @@ import { UtilsWhatsAppService } from './utils/utils.whatsapp';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { S3Storage } from './utils/utils.s3';
 import { TemplatesModule } from './templates/templates.module';
+import { ScheduledMessagesModule } from './scheduled-messages/scheduled-messages.module';
+import { CampaignsModule } from './campaigns/campaigns.module';
+import { BroadcastModule } from './broadcast/broadcast.module';
+import { WhatsappService } from './whatsapp/whatsapp.service';
+import { BroadcastService } from './broadcast/broadcast.service';
 
 const envFilePath: string = join(
   __dirname,
@@ -69,6 +74,9 @@ console.log(envFilePath);
     ChatModule,
     WhatsappModule,
     TemplatesModule,
+    ScheduledMessagesModule,
+    CampaignsModule,
+    BroadcastModule,
   ],
   controllers: [AppController],
   providers: [

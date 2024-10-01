@@ -16,8 +16,32 @@ export class TemplateService {
     return createdTemplate.save();
   }
 
-  async findAll(): Promise<ITemplate[]> {
-    return this.templateModel.find().exec();
+  async findAll(
+    filters: any,
+    page: number,
+    limit: number,
+  ): Promise<{
+    data: ITemplate[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const query = this.buildFilters(filters);
+
+    const templates = await this.templateModel
+      .find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+
+    const total = await this.templateModel.countDocuments(query).exec();
+
+    return {
+      data: templates,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: string): Promise<ITemplate> {
@@ -51,5 +75,24 @@ export class TemplateService {
       throw new NotFoundException(`Template with ID ${id} not found`);
     }
     return deletedTemplate;
+  }
+
+  private buildFilters(filters: any) {
+    const query: any = {};
+
+    if (filters.name) {
+      query.name = { $regex: filters.name, $options: 'i' }; // Case-insensitive search for template name
+    }
+    if (filters.category) {
+      query.category = filters.category;
+    }
+    if (filters.language) {
+      query.language = filters.language;
+    }
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    return query;
   }
 }
