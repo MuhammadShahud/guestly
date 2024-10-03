@@ -94,29 +94,29 @@ export class BroadcastController {
     return this.broadcastService.delete(id);
   }
 
-  @Post(':id/send')
-  @ApiOperation({ summary: 'Send broadcast message to contacts via WhatsApp' })
-  @ApiResponse({ status: 200, description: 'Broadcast sent successfully.' })
-  @ApiResponse({ status: 404, description: 'Broadcast not found.' })
-  @ApiResponse({ status: 500, description: 'Failed to send the broadcast.' })
-  async sendBroadcast(
-    @Param('id') id: string,
-    @Body() sendBroadcastDto: SendBroadcastDto,
-  ): Promise<any> {
-    return { message: 'This api is Under development' };
-    const broadcast = await this.broadcastService.findOne(id);
+  // @Post(':id/send')
+  // @ApiOperation({ summary: 'Send broadcast message to contacts via WhatsApp' })
+  // @ApiResponse({ status: 200, description: 'Broadcast sent successfully.' })
+  // @ApiResponse({ status: 404, description: 'Broadcast not found.' })
+  // @ApiResponse({ status: 500, description: 'Failed to send the broadcast.' })
+  // async sendBroadcast(
+  //   @Param('id') id: string,
+  //   @Body() sendBroadcastDto: SendBroadcastDto,
+  // ): Promise<any> {
 
-    if (!broadcast) {
-      throw new HttpException('Broadcast not found', HttpStatus.NOT_FOUND);
-    }
+  //   const broadcast = await this.broadcastService.findOne(id);
 
-    try {
-      return { message: 'Broadcast sent successfully to all contacts.' };
-    } catch (error) {
-      throw new HttpException(
-        'Failed to send the broadcast',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //   if (!broadcast) {
+  //     throw new HttpException('Broadcast not found', HttpStatus.NOT_FOUND);
+  //   }
+
+  //   try {
+  //     return { message: 'Broadcast sent successfully to all contacts.' };
+  //   } catch (error) {
+  //     throw new HttpException(
+  //       'Failed to send the broadcast',
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 }

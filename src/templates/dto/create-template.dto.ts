@@ -11,6 +11,7 @@ import {
   TemplateButtonTypeEnum,
   TemplateCategoryEnum,
   TemplateContentTypeEnum,
+  TemplateLanguage,
   TemplateStatusEnum,
 } from '../enums/template.enum';
 import { IsTemplateButtonsArray } from '../validator/buttons.validator';
@@ -94,6 +95,7 @@ export class CreateTemplateDto {
 
   @ApiProperty({ example: 'en', description: 'The language of the template' })
   @IsString()
+  @IsEnum(TemplateLanguage)
   readonly language: string;
 
   @ApiProperty({
@@ -140,10 +142,10 @@ export class CreateTemplateDto {
     type: [TemplateButtonDto],
   })
   @IsOptional()
-  @IsTemplateButtonsArray({
-    message:
-      'Only one object of each type and only one of QUICK_REPLY or CALL_TO_ACTION can exist in the buttons array.',
-  })
+  // @IsTemplateButtonsArray({
+  //   message:
+  //     'Only one object of each type and only one of QUICK_REPLY or CALL_TO_ACTION can exist in the buttons array.',
+  // })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TemplateButtonDto)

@@ -5,9 +5,15 @@ export enum TemplateCategoryEnum {
 }
 
 export enum TemplateContentTypeEnum {
-  TEXT = 'text',
-  MEDIA = 'media',
-  LOCATION = 'location',
+  TEXT = 'TEXT',
+  MEDIA = 'MEDIA',
+  LOCATION = 'LOCATION',
+}
+
+export enum TemplateLanguage {
+  EN = 'en',
+  DE = 'de',
+  It = 'it',
 }
 
 export enum TemplateButtonTypeEnum {

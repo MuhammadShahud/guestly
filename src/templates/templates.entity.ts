@@ -4,6 +4,7 @@ import {
   TemplateButtonTypeEnum,
   TemplateCategoryEnum,
   TemplateContentTypeEnum,
+  TemplateLanguage,
   TemplateStatusEnum,
 } from './enums/template.enum';
 
@@ -71,6 +72,9 @@ const BodyVariableSchema = new Schema(
 
 const TemplateSchema = new Schema(
   {
+    whatsAppTemplateId: {
+      type: String,
+    },
     name: {
       type: String,
       required: [true, 'Please provide a name'],
@@ -86,6 +90,10 @@ const TemplateSchema = new Schema(
     },
     language: {
       type: String,
+      enum: {
+        values: Object.values(TemplateLanguage),
+        message: `{VALUE} is not supported.`,
+      },
       required: [true, 'Please provide a language'],
     },
     header: {

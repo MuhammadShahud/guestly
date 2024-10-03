@@ -21,5 +21,6 @@ import { OrganizationModule } from 'src/organization/organization.module';
   ],
   controllers: [WhatsappController],
   providers: [WhatsappService, UtilsWhatsAppService, S3Storage, ApiService],
+  exports: [WhatsappService],
 })
 export class WhatsappModule {}

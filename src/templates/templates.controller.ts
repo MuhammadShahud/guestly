@@ -35,8 +35,8 @@ export class TemplateController {
   })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiBody({ type: CreateTemplateDto })
-  create(@Body() createTemplateDto: CreateTemplateDto) {
-    return this.templateService.create(createTemplateDto);
+  async create(@Body() createTemplateDto: CreateTemplateDto) {
+    return await this.templateService.create(createTemplateDto);
   }
 
   @Get()

@@ -23,6 +23,7 @@ interface BodyVariableDto {
 }
 
 interface ITemplate extends Document {
+  whatsAppTemplateId: string;
   name: string;
   category: TemplateCategoryEnum;
   language: string;
@@ -31,10 +32,10 @@ interface ITemplate extends Document {
   body_variables?: BodyVariableDto[];
   footer?: string;
   buttons?: ITemplateButton[];
-  user_id: string;
+  business: string;
   status: TemplateStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export { ITemplate, ITemplateHeader, ITemplateButton };

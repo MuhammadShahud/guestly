@@ -10,6 +10,7 @@ import { ContactsService } from 'src/contacts/contacts.service';
 import { ContactsModule } from 'src/contacts/contacts.module';
 import { TemplatesModule } from 'src/templates/templates.module';
 import { ToolsIntegrationsModule } from 'src/tools-integrations/tools-integrations.module';
+import { WhatsappModule } from 'src/whatsapp/whatsapp.module';
 @Module({
   imports: [
     AuthModule,
@@ -17,6 +18,7 @@ import { ToolsIntegrationsModule } from 'src/tools-integrations/tools-integratio
     TemplatesModule,
     ToolsIntegrationsModule,
     MongooseModule.forFeature([{ name: 'Broadcast', schema: BroadcastSchema }]),
+    WhatsappModule,
   ],
   controllers: [BroadcastController],
   providers: [BroadcastService, ApiService],
