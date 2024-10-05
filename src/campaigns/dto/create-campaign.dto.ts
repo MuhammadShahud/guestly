@@ -6,9 +6,14 @@ import {
   ValidateNested,
   IsMongoId,
   ArrayMinSize,
+  IsArray,
+  IsBoolean,
+  Validate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { OneDefaultTemplateValidator } from 'src/broadcast/validation/defaultTemplate.validator';
+import { CampaignStatus } from '../enums/campaign.emun';
 
 export class BodyVariableDto {
   @ApiProperty({
@@ -46,6 +51,38 @@ export class SchedulingDto {
   time: string;
 }
 
+export class CampaignTemplateDto {
+  @ApiProperty({
+    description: 'Template content',
+    example: '66f58cd0cd4cf1a3351079ce',
+  })
+  @IsString()
+  template: string;
+
+  @ApiProperty({
+    description: 'Language of the template',
+    example: 'en',
+  })
+  @IsString()
+  language: string;
+
+  @ApiProperty({
+    description: 'Mark template as defaultl',
+    example: 'false',
+  })
+  @IsBoolean()
+  is_default: boolean;
+
+  @ApiProperty({
+    description: 'List of body variables used in the template',
+    type: [BodyVariableDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BodyVariableDto)
+  body_variables: BodyVariableDto[];
+}
+
 export class CreateCampaignDto {
   @ApiProperty({
     description: 'Name of the campaign',
@@ -56,37 +93,23 @@ export class CreateCampaignDto {
   name: string;
 
   @ApiProperty({
-    description: 'Contact segment ID',
-    example: '60dfef1e2a3f2c1b7d4df13a',
+    description: 'List of Contact segment ID',
+    example: ['seg1', 'seg2'],
+    type: [String],
   })
-  @IsMongoId()
-  @IsNotEmpty({ message: 'ContactSegment id is required' })
-  contact_segment: string;
+  @IsArray()
+  @IsString({ each: true })
+  contact_segments: string[];
 
   @ApiProperty({
-    description: 'Template ID',
-    example: '60dfef1e2a3f2c1b7d4df13b',
+    description: 'List of templates used in the Campaign',
+    type: [CampaignTemplateDto],
   })
-  @IsMongoId()
-  @IsNotEmpty({ message: 'Template id is required' })
-  template: string;
-
-  @ApiProperty({
-    description: 'Language of the campaign',
-    example: 'en',
-  })
-  @IsString()
-  @IsNotEmpty({ message: 'Please provide a language' })
-  language: string;
-
-  @ApiProperty({
-    description: 'Body variables used in the campaign',
-    type: [BodyVariableDto],
-  })
+  @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BodyVariableDto)
-  @ArrayMinSize(1, { message: 'At least one body variable is required' })
-  body_variables: BodyVariableDto[];
+  @Validate(OneDefaultTemplateValidator)
+  @Type(() => CampaignTemplateDto)
+  templates: CampaignTemplateDto[];
 
   @ApiProperty({
     description: 'Business ID',
@@ -98,10 +121,10 @@ export class CreateCampaignDto {
 
   @ApiProperty({
     description: 'Status of the campaign',
-    enum: ['Active', 'InActive'],
-    example: 'Active',
+    enum: Object.keys(CampaignStatus),
+    example: 'DRAFT',
   })
-  @IsEnum(['Active', 'InActive'], { message: '{VALUE} is not supported.' })
+  @IsEnum(Object.keys(CampaignStatus), { message: '{VALUE} is not supported.' })
   @IsOptional()
   status: string;
 

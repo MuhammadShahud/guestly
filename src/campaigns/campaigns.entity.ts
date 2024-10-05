@@ -27,6 +27,29 @@ const SchedulingSchema = new Schema(
   { _id: false },
 );
 
+const CampaignTemplateSchema = new Schema(
+  {
+    template: {
+      type: Schema.Types.ObjectId,
+      ref: 'Template', // Update to your actual Booking model name
+      required: [true, 'Template are required'],
+    },
+    language: {
+      type: String,
+      required: [true, 'language is required'],
+    },
+    body_variables: {
+      type: [BodyVariableSchema],
+      default: [],
+    },
+    is_default: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: false },
+);
+
 const CampaignSchema = new Schema(
   {
     name: {
@@ -35,25 +58,15 @@ const CampaignSchema = new Schema(
       trim: true,
     },
 
-    contact_segment: {
-      type: Schema.Types.ObjectId,
+    contact_segments: {
+      type: [Schema.Types.ObjectId],
       ref: 'ContactSegment',
       required: [true, 'ContactSegment id is required'],
     },
 
-    template: {
-      type: Schema.Types.ObjectId,
-      ref: 'Template',
-      required: [true, 'template id is required'],
-    },
-
-    language: {
-      type: String,
-      required: [true, 'Please provide a language'],
-    },
-    body_variables: {
-      type: [BodyVariableSchema],
-      default: [],
+    templates: {
+      type: [CampaignTemplateSchema],
+      required: [true, 'templates are required'],
     },
 
     business: {

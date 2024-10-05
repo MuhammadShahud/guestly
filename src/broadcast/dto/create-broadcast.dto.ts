@@ -1,83 +1,64 @@
-import {
-  IsMongoId,
-  IsString,
-  IsArray,
-  IsEnum,
-  ValidateNested,
-  ArrayMinSize,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+// src/broadcast/dto/create-broadcast.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsArray,
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+  ValidateNested,
+  Validate,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+import { BroadcastTemplateDto } from './send-broadcast.dto';
 import { BroadcastStatus } from '../enum/broadcast.enum';
-
-export class BodyVariableDto {
-  @ApiProperty({
-    description: 'Name of the variable',
-    example: 'firstName',
-  })
-  @IsString()
-  @IsNotEmpty({ message: 'variable_name is required' })
-  variable_name: string;
-
-  @ApiProperty({
-    description: 'Value of the variable',
-    example: 'John',
-  })
-  @IsString()
-  @IsOptional()
-  value: string;
-}
-
+import { OneDefaultTemplateValidator } from '../validation/defaultTemplate.validator';
 export class CreateBroadcastDto {
   @ApiProperty({
-    description: 'List of contact IDs',
+    description: 'List of booking IDs associated with the broadcast',
+    example: ['booking1', 'booking2'],
     type: [String],
-    example: ['60dfef1e2a3f2c1b7d4df13a'],
   })
   @IsArray()
-  @ArrayMinSize(1, { message: 'At least one contact is required' })
-  @IsMongoId({ each: true })
-  contacts: string[];
+  @IsString({ each: true })
+  bookings: string[];
 
   @ApiProperty({
-    description: 'Template ID',
-    example: '60dfef1e2a3f2c1b7d4df13b',
+    description: 'List of templates used in the broadcast',
+    type: [BroadcastTemplateDto],
   })
-  @IsMongoId()
-  @IsNotEmpty({ message: 'Template ID is required' })
-  template: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Validate(OneDefaultTemplateValidator)
+  @Type(() => BroadcastTemplateDto)
+  templates: BroadcastTemplateDto[];
 
   @ApiProperty({
-    description: 'Language of the broadcast',
-    example: 'en',
+    description: 'Business identifier associated with the broadcast',
+    example: 'business123',
   })
   @IsString()
-  @IsNotEmpty({ message: 'Language is required' })
-  language: string;
-
-  @ApiProperty({
-    description: 'Body variables',
-    type: [BodyVariableDto],
-  })
-  @ValidateNested({ each: true })
-  @Type(() => BodyVariableDto)
-  body_variables: BodyVariableDto[];
-
-  @ApiProperty({
-    description: 'Business ID',
-    example: '60dfef1e2a3f2c1b7d4df13c',
-  })
-  @IsMongoId()
-  @IsNotEmpty({ message: 'Business ID is required' })
   business: string;
 
   @ApiProperty({
     description: 'Status of the broadcast',
     enum: BroadcastStatus,
-    default: BroadcastStatus.PENDING,
+    example: BroadcastStatus.PENDING,
   })
-  @IsEnum(BroadcastStatus, { message: `{VALUE} is not supported.` })
+  @IsEnum(BroadcastStatus)
   status: BroadcastStatus;
+
+  @ApiProperty({
+    description: 'Creation date of the broadcast',
+    example: '2023-01-01T00:00:00.000Z',
+  })
+  @IsDateString()
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Last update date of the broadcast',
+    example: '2023-01-02T00:00:00.000Z',
+  })
+  @IsDateString()
+  updatedAt: Date;
 }

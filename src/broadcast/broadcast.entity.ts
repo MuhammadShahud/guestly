@@ -1,4 +1,5 @@
-import { Schema } from 'mongoose';
+// src/broadcast/schemas/broadcast.schema.ts
+import { Schema, Types } from 'mongoose';
 import { BroadcastStatus } from './enum/broadcast.enum';
 
 const BodyVariableSchema = new Schema(
@@ -15,39 +16,53 @@ const BodyVariableSchema = new Schema(
   { _id: false },
 );
 
-const BroadcastSchema = new Schema(
+const BroadcastTemplateSchema = new Schema(
   {
-    contacts: {
-      type: [Schema.Types.ObjectId],
-      ref: 'Contacts',
-      required: [true, 'Contact id is required'],
-    },
-
     template: {
       type: Schema.Types.ObjectId,
-      ref: 'Template',
-      required: [true, 'template id is required'],
+      ref: 'Template', // Update to your actual Booking model name
+      required: [true, 'Template are required'],
     },
-
     language: {
       type: String,
-      required: [true, 'Please provide a language'],
+      required: [true, 'language is required'],
     },
     body_variables: {
       type: [BodyVariableSchema],
       default: [],
     },
+    is_default: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: false },
+);
+
+const BroadcastSchema = new Schema(
+  {
+    bookings: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Booking', // Update to your actual Booking model name
+      required: [true, 'bookings are required'],
+    },
+
+    templates: {
+      type: [BroadcastTemplateSchema],
+      required: [true, 'templates are required'],
+    },
 
     business: {
       type: Schema.Types.ObjectId,
-      ref: 'Buisness',
-      required: [true, 'business id are required'],
+      ref: 'Business', // Ensure this matches your actual Business model
+      required: [true, 'business id is required'],
     },
+
     status: {
       type: String,
       enum: {
-        values: Object.keys(BroadcastStatus),
-        message: `{VALUE} is not supported.`,
+        values: Object.values(BroadcastStatus),
+        message: '{VALUE} is not supported.',
       },
       default: BroadcastStatus.PENDING,
     },

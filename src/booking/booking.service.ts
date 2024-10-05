@@ -7,7 +7,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { IBooking } from './interfaces/booking.interface';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { FilterQuery, Model } from 'mongoose';
 import { ContactsService } from 'src/contacts/contacts.service';
 import { IUser } from 'src/user/interfaces/user.interface';
 import { pagination } from 'src/common/interface/pagination';
@@ -280,6 +280,7 @@ export class BookingService {
 
     return { data };
   }
+
   async fetchComments(bookingId: string) {
     const data = await this.Booking.findById(bookingId, 'comments').populate({
       path: 'comments.user',
@@ -290,6 +291,7 @@ export class BookingService {
 
     return data;
   }
+
   async deleteComment(bookingId: string, commentId: string) {
     const data = await this.Booking.findOneAndUpdate(
       { _id: bookingId },
@@ -304,5 +306,9 @@ export class BookingService {
     );
 
     return { data };
+  }
+
+  async getBookingsByFilter(filter: FilterQuery<IBooking>) {
+    return this.Booking.find(filter).populate('mainGuest');
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateWhatsappDto } from './dto/create-whatsapp.dto';
 import { UpdateWhatsappDto } from './dto/update-whatsapp.dto';
 import { UtilsWhatsAppService } from 'src/utils/utils.whatsapp';
@@ -18,7 +18,13 @@ import {
 } from 'src/templates/enums/template.enum';
 import { ITemplate } from 'src/templates/interfaces/template.interface';
 import { ConfigService } from '@nestjs/config';
-import { IBroadcast } from 'src/broadcast/interfaces/broadcast.enum';
+import {
+  BroadcastTemplate,
+  IBroadcast,
+} from 'src/broadcast/interfaces/broadcast.interface';
+import { BookingService } from 'src/booking/booking.service';
+import { IContact } from 'src/contacts/interface/contact.interface';
+import { TemplateService } from 'src/templates/templates.service';
 
 @Injectable()
 export class WhatsappService {
@@ -32,6 +38,9 @@ export class WhatsappService {
     private readonly buisnessService: BuisnessService,
     private readonly organizationervice: OrganizationService,
     private readonly configService: ConfigService,
+    private readonly bookingService: BookingService,
+    @Inject(forwardRef(() => TemplateService))
+    private readonly templateService: TemplateService,
   ) {}
 
   private createTemplateURL = (wab_id: string) =>
@@ -339,68 +348,82 @@ export class WhatsappService {
     return res;
   }
 
-  async sendBroadCastMessages(B: IBroadcast, template: ITemplate) {
-    if (B.body_variables.length != template.body_variables.length) {
-      throw new Error('Please provide all body variables for the template.');
-    }
-
-    if (!template.whatsAppTemplateId) {
-      throw new Error('Template is not registerd on whatsapp.');
-    }
-
-    if (template.status != TemplateStatusEnum.APPROVED) {
-      throw new Error('Template is not approved to send messages.');
-    }
-
-    const business = await this.toolsAndIntegration.getTandIFn({
-      buisness: B.business,
+  async sendBroadCastMessage(
+    contact: string,
+    template: BroadcastTemplate,
+    business: string,
+  ) {
+    const b = await this.toolsAndIntegration.getTandIFn({
+      buisness: business,
     });
 
-    if (!business.whatsapp) {
+    if (!b.whatsapp) {
       throw new Error(
         "Can't find whatsapp of your business, You must connect whatsapp business account before creating template",
       );
     }
 
-    const body_parameters = B.body_variables.map((v) => {
+    const contact_doc = await this.contactService.getContactFn({
+      _id: contact,
+    });
+
+    if (!contact_doc) {
+      throw new Error('Contact Not found.');
+    }
+
+    if (!template) {
+      throw new Error('Broadcast template not found.');
+    }
+
+    const created_template = await this.templateService.findOne(
+      template.template,
+    );
+
+    if (!created_template) {
+      throw new Error('Template Not found');
+    }
+
+    if (!created_template.whatsAppTemplateId) {
+      throw new Error('Template is not registerd on whatsapp.');
+    }
+
+    if (
+      template.body_variables.length != created_template.body_variables.length
+    ) {
+      throw new Error('Please provide all body variables for the template.');
+    }
+
+    if (created_template.status != TemplateStatusEnum.APPROVED) {
+      throw new Error('Template is not approved to send messages.');
+    }
+
+    const from_contact = await this.contactService.getContactFn({
+      buisness: business,
+    });
+
+    const body_parameters = template.body_variables.map((v) => {
       return { type: 'text', text: v.value };
     });
+
     const message = await this.createTemplateMessage(
-      template,
-      Number(business.whatsapp.phoneNumberId),
+      created_template,
+      Number(contact_doc.phoneNo),
       body_parameters,
     );
 
-    console.log(JSON.stringify(message));
-
-    const sendMessageToContact = async (contactId: string) => {
-      const contact = await this.contactService.getContactFn(contactId);
-
-      const [err, res] = await this.apiService.postApi(
-        this.createMessageURL(contact.phoneNo),
-        message,
-        {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.configService.get('WHATSAPP_API_TOKEN')}`,
-        },
-      );
-
-      if (err) {
-        console.error(`Error sending message to ${contact}:`, err);
-        return { success: false, contact };
-      }
-
-      console.log(`Message sent successfully to ${contact}`);
-      return { success: true, contact };
-    };
-
-    const results = await Promise.all(
-      B.contacts.map((contact) => sendMessageToContact(contact)),
+    const [err, res] = await this.apiService.postApi(
+      this.createMessageURL(from_contact.phoneNo),
+      message,
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.configService.get('WHATSAPP_API_TOKEN')}`,
+      },
     );
+    if (err) {
+      console.error(`Error sending message to ${contact}:`, err);
+      return { success: false, contact };
+    }
 
-    const failedMessages = results.filter((result) => !result.success);
-    console.log('Failed Messages:', failedMessages);
-
-    return results;
+    return { success: true, contact };
   }
 }

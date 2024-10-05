@@ -2,35 +2,70 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateBroadcastDto } from './dto/create-broadcast.dto';
 import { UpdateBroadcastDto } from './dto/update-broadcast.dto';
-import { IBroadcast } from './interfaces/broadcast.enum';
-import { ConfigService } from '@nestjs/config';
-import { ApiService } from 'src/utils/apiServise';
-import { TemplateService } from 'src/templates/templates.service';
-import { ContactsService } from 'src/contacts/contacts.service';
-import { ToolsIntegrationsService } from 'src/tools-integrations/tools-integrations.service';
-import { WhatsappService } from 'src/whatsapp/whatsapp.service';
+import { IBroadcast } from './interfaces/broadcast.interface';
+import { Job, Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
+import { BookingService } from 'src/booking/booking.service';
 
 @Injectable()
-export class BroadcastService {
+export class BroadcastService implements OnModuleInit {
   constructor(
     @InjectModel('Broadcast')
     private readonly broadcastModel: Model<IBroadcast>,
-    private readonly whatsappService: WhatsappService,
-    private readonly templateService: TemplateService,
+    private readonly bookingService: BookingService,
+
+    @InjectQueue('broadcast') private readonly broadcastQueue: Queue,
   ) {}
+
+  private readonly logger = new Logger();
 
   async create(createBroadcastDto: CreateBroadcastDto): Promise<IBroadcast> {
     const broadcast = new this.broadcastModel(createBroadcastDto);
 
-    if (broadcast) {
-      const template = await this.templateService.findOne(broadcast.business);
-      await this.whatsappService.sendBroadCastMessages(broadcast, template);
+    const bookings = await this.bookingService.getBookingsByFilter({
+      _id: { $in: broadcast.bookings },
+    });
+
+    const contacts = bookings.map((a) => a.mainGuest);
+
+    for (let i = 0; i < contacts.length; i++) {
+      const contact = contacts[i];
+
+      const template = broadcast.templates.find(
+        (t) => t.language == contact.language,
+      );
+
+      const default_template = broadcast.templates.find(
+        (t) => t.is_default == true,
+      );
+
+      console.log(template, default_template);
+
+      await this.broadcastQueue.add(
+        'send',
+        {
+          contact: contact._id,
+          template: template ? template : default_template,
+          business: broadcast.business,
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 5000,
+          },
+          removeOnComplete: true,
+          removeOnFail: false,
+        },
+      );
     }
 
     return broadcast.save();
@@ -116,5 +151,19 @@ export class BroadcastService {
       query.business = filters.business;
     }
     return query;
+  }
+
+  async onModuleInit() {
+    this.broadcastQueue.on('completed', (job: Job) => {
+      this.logger.log(`Job ${job.id} completed successfully.`);
+    });
+
+    this.broadcastQueue.on('failed', (job: Job, err: Error) => {
+      this.logger.error(`Job ${job.id} failed with error: ${err.message}`);
+    });
+
+    this.broadcastQueue.on('active', (job: Job) => {
+      this.logger.log(`Job ${job.id} is now active.`);
+    });
   }
 }

@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { DatabaseModule } from './common/database/database.module';
 import { LoggerMiddleware } from './utils/logger.middleware';
@@ -36,8 +36,7 @@ import { TemplatesModule } from './templates/templates.module';
 import { ScheduledMessagesModule } from './scheduled-messages/scheduled-messages.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { BroadcastModule } from './broadcast/broadcast.module';
-import { WhatsappService } from './whatsapp/whatsapp.service';
-import { BroadcastService } from './broadcast/broadcast.service';
+import { BullModule } from '@nestjs/bull';
 
 const envFilePath: string = join(
   __dirname,
@@ -50,6 +49,17 @@ console.log(envFilePath);
 
 @Module({
   imports: [
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6380),
+          password: configService.get<string>('REDIS_PASSWORD'), // Optional
+        },
+      }),
+      inject: [ConfigService],
+    }),
     // SentryModule.forRoot(),
     ConfigModule.forRoot({
       // envFilePath
@@ -72,11 +82,11 @@ console.log(envFilePath);
     TasksModule,
     ContactSegmentsModule,
     ChatModule,
-    WhatsappModule,
     TemplatesModule,
     ScheduledMessagesModule,
     CampaignsModule,
     BroadcastModule,
+    WhatsappModule,
   ],
   controllers: [AppController],
   providers: [

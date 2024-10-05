@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ITemplate } from './interfaces/template.interface';
@@ -9,8 +14,9 @@ import { WhatsappService } from 'src/whatsapp/whatsapp.service';
 @Injectable()
 export class TemplateService {
   constructor(
-    private readonly wService: WhatsappService,
     @InjectModel('Template') private readonly templateModel: Model<ITemplate>,
+    @Inject(forwardRef(() => WhatsappService))
+    private readonly whatsappService: WhatsappService,
   ) {}
 
   async create(createTemplateDto: CreateTemplateDto): Promise<ITemplate> {
@@ -28,7 +34,8 @@ export class TemplateService {
     const createdTemplate = new this.templateModel(createTemplateDto);
 
     if (createdTemplate) {
-      const t = await this.wService.createWhatsappTemplate(createdTemplate);
+      const t =
+        await this.whatsappService.createWhatsappTemplate(createdTemplate);
 
       createdTemplate.status = String(t['status']);
       createdTemplate.whatsAppTemplateId = String(t['id']);
@@ -73,7 +80,7 @@ export class TemplateService {
     }
 
     if (template && template.whatsAppTemplateId) {
-      const t = await this.wService.getTempleteById(
+      const t = await this.whatsappService.getTempleteById(
         template.whatsAppTemplateId,
       );
 
@@ -95,9 +102,9 @@ export class TemplateService {
       .exec();
 
     if (existingTemplate && existingTemplate.whatsAppTemplateId) {
-      await this.wService.updateWhatsappTemplate(existingTemplate);
+      await this.whatsappService.updateWhatsappTemplate(existingTemplate);
 
-      const t = await this.wService.getTempleteById(
+      const t = await this.whatsappService.getTempleteById(
         existingTemplate.whatsAppTemplateId,
       );
 

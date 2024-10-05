@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TemplateService } from './templates.service';
 import { TemplateController } from './templates.controller';
 import { AuthModule } from 'src/auth/auth.module';
@@ -10,7 +10,7 @@ import { WhatsappModule } from 'src/whatsapp/whatsapp.module';
   imports: [
     AuthModule,
     MongooseModule.forFeature([{ name: 'Template', schema: TemplateSchema }]),
-    WhatsappModule,
+    forwardRef(() => WhatsappModule),
   ],
   providers: [TemplateService],
   controllers: [TemplateController],
