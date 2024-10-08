@@ -15,7 +15,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { OneDefaultTemplateValidator } from 'src/broadcast/validation/defaultTemplate.validator';
 import { CampaignStatus } from '../enums/campaign.emun';
 
-export class BodyVariableDto {
+export class CampaignBodyVariableDto {
   @ApiProperty({
     description: 'Name of the body variable',
     example: 'firstName',
@@ -33,7 +33,7 @@ export class BodyVariableDto {
   value: string;
 }
 
-export class SchedulingDto {
+export class CampaignSchedulingDto {
   @ApiProperty({
     description: 'Date for scheduling the campaign',
     example: '2024-10-01',
@@ -75,12 +75,12 @@ export class CampaignTemplateDto {
 
   @ApiProperty({
     description: 'List of body variables used in the template',
-    type: [BodyVariableDto],
+    type: [CampaignBodyVariableDto],
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BodyVariableDto)
-  body_variables: BodyVariableDto[];
+  @Type(() => CampaignBodyVariableDto)
+  body_variables: CampaignBodyVariableDto[];
 }
 
 export class CreateCampaignDto {
@@ -128,11 +128,13 @@ export class CreateCampaignDto {
   @IsOptional()
   status: string;
 
+  err_message: string;
+
   @ApiProperty({
     description: 'Scheduling details for the campaign',
   })
   @ValidateNested()
-  @Type(() => SchedulingDto)
+  @Type(() => CampaignSchedulingDto)
   @IsNotEmpty({ message: 'Scheduling is required' })
-  scheduling: SchedulingDto;
+  scheduling: CampaignSchedulingDto;
 }

@@ -1,18 +1,52 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ICampaign } from './interfaces/campaign.interface';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Job, Queue } from 'bull';
+import { CampaignStatus } from './enums/campaign.emun';
 
 @Injectable()
-export class CampaignService {
+export class CampaignService implements OnModuleInit {
   constructor(
     @InjectModel('Campaign') private readonly campaignModel: Model<ICampaign>,
+
+    @InjectQueue('campaign') private readonly campaignQueue: Queue,
   ) {}
+
+  private readonly logger = new Logger();
 
   async create(createCampaignDto: CreateCampaignDto): Promise<ICampaign> {
     const campaign = new this.campaignModel(createCampaignDto);
+
+    if (campaign.status == CampaignStatus.SCHEDULED) {
+      for (let i = 0; i < campaign.contact_segments.length; i++) {
+        const segmentId = campaign.contact_segments[i];
+
+        await this.campaignQueue.add(
+          'register',
+          {
+            segment: segmentId,
+            business: campaign.business,
+            campaign: campaign._id,
+          },
+          {
+            attempts: 3,
+            delay: 2000,
+            removeOnComplete: true,
+            removeOnFail: false,
+          },
+        );
+      }
+    }
+
     return campaign.save();
   }
 
@@ -58,6 +92,31 @@ export class CampaignService {
 
     if (!updatedCampaign) {
       throw new NotFoundException(`Campaign with ID ${id} not found`);
+    }
+
+    if (
+      updateCampaignDto.status &&
+      updateCampaignDto.status == CampaignStatus.SCHEDULED &&
+      updatedCampaign.status == CampaignStatus.SCHEDULED
+    ) {
+      for (let i = 0; i < updatedCampaign.contact_segments.length; i++) {
+        const segmentId = updatedCampaign.contact_segments[i];
+
+        await this.campaignQueue.add(
+          'register',
+          {
+            segment: segmentId,
+            business: updatedCampaign.business,
+            campaign: updatedCampaign._id,
+          },
+          {
+            attempts: 3,
+            delay: 2000,
+            removeOnComplete: true,
+            removeOnFail: false,
+          },
+        );
+      }
     }
 
     return updatedCampaign;
@@ -148,5 +207,35 @@ export class CampaignService {
     }
 
     return query;
+  }
+
+  async onModuleInit() {
+    this.campaignQueue.on('completed', async (job: Job) => {
+      this.logger.log(`Job ${job.id} completed successfully.`);
+      if (job.data?.campaign) {
+        await this.update(job.data?.campaign, {
+          status: CampaignStatus.SENT,
+        });
+      }
+    });
+
+    this.campaignQueue.on('failed', async (job: Job, err: Error) => {
+      this.logger.error(`Job ${job.id} failed with error: ${err.message}`);
+      if (job.data?.campaign) {
+        await this.update(job.data?.campaign, {
+          status: CampaignStatus.FAILED,
+          err_message: err.message,
+        });
+      }
+    });
+
+    this.campaignQueue.on('active', async (job: Job) => {
+      this.logger.log(`Job ${job.id} is now active.`);
+      if (job.data?.campaign) {
+        await this.update(job.data?.campaign, {
+          status: CampaignStatus.SENDING,
+        });
+      }
+    });
   }
 }

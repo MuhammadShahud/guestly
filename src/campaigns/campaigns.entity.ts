@@ -82,7 +82,9 @@ const CampaignSchema = new Schema(
       },
       default: CampaignStatus.DRAFT,
     },
-
+    err_message: {
+      type: String,
+    },
     scheduling: {
       type: SchedulingSchema,
       required: [true, 'scheduling are required'],

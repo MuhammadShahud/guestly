@@ -1,21 +1,16 @@
-// src/broadcast/broadcast.processor.ts
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
-import { BroadcastService } from './broadcast.service';
 import { Logger } from '@nestjs/common';
 import { WhatsappService } from 'src/whatsapp/whatsapp.service';
 
-@Processor('broadcast')
-export class BroadcastProcessor {
-  private readonly logger = new Logger(BroadcastProcessor.name);
+@Processor('scheduled-messages')
+export class ScheduledMessagesProcessor {
+  private readonly logger = new Logger(ScheduledMessagesProcessor.name);
 
-  constructor(
-    private readonly broadcastService: BroadcastService,
-    private readonly whatsappService: WhatsappService,
-  ) {}
+  constructor(private readonly whatsappService: WhatsappService) {}
 
   @Process('send')
-  async handleSendBroadcast(
+  async handleSendScheduledMessages(
     job: Job<{
       template: any;
       contact: string;
@@ -26,7 +21,6 @@ export class BroadcastProcessor {
     this.logger.log(`Processing job ${job.id} for Contact ID: ${contact}`);
 
     try {
-      await this.whatsappService.sendMessage(contact, template, business);
     } catch (error) {
       throw error; // Rethrow to allow Bull to handle retries
     }

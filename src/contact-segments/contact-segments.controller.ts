@@ -68,10 +68,9 @@ export class ContactSegmentsController {
     @Param('segmentId') segmentId: string,
     @GetUser() user: IUser,
   ) {
-    console.log(user, 'user');
     return await this.contactSegmentsService.getContactsBySegementId(
       segmentId,
-      user,
+      user?.currentBuisness?.id,
     );
   }
 

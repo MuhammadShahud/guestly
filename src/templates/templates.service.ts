@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { ITemplate } from './interfaces/template.interface';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
@@ -91,6 +91,16 @@ export class TemplateService {
       }
     }
     return template;
+  }
+
+  async updateByFilter(
+    filter: FilterQuery<ITemplate>,
+    updateTemplateDto: UpdateTemplateDto,
+  ): Promise<ITemplate> {
+    const existingTemplate = await this.templateModel
+      .findOneAndUpdate(filter, updateTemplateDto, { new: true })
+      .exec();
+    return existingTemplate;
   }
 
   async update(

@@ -238,6 +238,15 @@ export class WhatsappService {
         }
       }
     }
+
+    if (body?.field == 'message_template_status_update') {
+      await this.templateService.updateByFilter(
+        {
+          whatsAppTemplateId: body.value.message_template_id,
+        },
+        { status: body.value.status },
+      );
+    }
   }
 
   async downloadWhatsAppMedia(mediaId: string, accessToken: string) {
@@ -348,7 +357,7 @@ export class WhatsappService {
     return res;
   }
 
-  async sendBroadCastMessage(
+  async sendMessage(
     contact: string,
     template: BroadcastTemplate,
     business: string,

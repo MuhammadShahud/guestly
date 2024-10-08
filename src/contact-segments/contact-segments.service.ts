@@ -210,7 +210,7 @@ export class ContactSegmentsService {
     return result;
   }
 
-  async getContactsBySegementId(segmentId: string, user: IUser) {
+  async getContactsBySegementId(segmentId: string, business: string) {
     const segment = await this.contactSegmentModel.findById(segmentId);
     // console.log('this is segment', segment);
     const orArray = [];
@@ -222,7 +222,7 @@ export class ContactSegmentsService {
         orArray[index]['$and'].push(query);
       });
     });
-    const business_id = new mongoose.Types.ObjectId(user?.currentBuisness.id);
+    const business_id = new mongoose.Types.ObjectId(business);
     // console.log(orArray, 'this is the or array', business_id);
     const result = await this.contactService.getContactForSegment(orArray, {
       buisness: business_id,

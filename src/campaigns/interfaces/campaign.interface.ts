@@ -10,10 +10,11 @@ export interface CampaignTemplate {
 
 export interface ICampaign extends Document {
   name: string;
-  contact_segment: string[];
+  contact_segments: string[];
   templates: CampaignTemplate[];
   business: string;
   status: CampaignStatus;
+  err_message: string;
   scheduling: { date: string; time: string };
   createdAt: Date;
   updatedAt: Date;

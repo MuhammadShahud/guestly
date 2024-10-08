@@ -16,5 +16,6 @@ import { ContactsModule } from 'src/contacts/contacts.module';
   ],
   controllers: [ContactSegmentsController],
   providers: [ContactSegmentsService],
+  exports: [ContactSegmentsService],
 })
 export class ContactSegmentsModule {}

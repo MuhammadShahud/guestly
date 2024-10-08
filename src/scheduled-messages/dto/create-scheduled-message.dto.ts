@@ -15,7 +15,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { OneDefaultTemplateValidator } from 'src/broadcast/validation/defaultTemplate.validator';
 import { ScheduleMessageStatus } from '../enum/schedule-message.enum';
 
-export class BodyVariableDto {
+export class SMBodyVariableDto {
   @ApiProperty({
     description: 'Name of the variable',
     example: 'firstName',
@@ -83,12 +83,12 @@ export class ScheduledMessageTemplateDto {
 
   @ApiProperty({
     description: 'List of body variables used in the template',
-    type: [BodyVariableDto],
+    type: [SMBodyVariableDto],
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BodyVariableDto)
-  body_variables: BodyVariableDto[];
+  @Type(() => SMBodyVariableDto)
+  body_variables: SMBodyVariableDto[];
 }
 
 export class CreateScheduledMessageDto {

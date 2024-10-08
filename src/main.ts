@@ -41,9 +41,17 @@ async function bootstrap() {
   serverAdapter.setBasePath('/admin/queues');
 
   const broadcastQueue = app.get<Queue>(getQueueToken('broadcast'));
+  const campaignQueue = app.get<Queue>(getQueueToken('campaign'));
+  const scheduledMessagesQueue = app.get<Queue>(
+    getQueueToken('scheduled-messages'),
+  );
 
   createBullBoard({
-    queues: [new BullAdapter(broadcastQueue)],
+    queues: [
+      new BullAdapter(broadcastQueue),
+      new BullAdapter(campaignQueue),
+      new BullAdapter(scheduledMessagesQueue),
+    ],
     serverAdapter: serverAdapter,
   });
 
