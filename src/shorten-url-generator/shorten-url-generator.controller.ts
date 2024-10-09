@@ -5,6 +5,8 @@ import {
   NotFoundException,
   Param,
   Post,
+  Redirect,
+  Res,
 } from '@nestjs/common';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { ShortenUrlGeneratorService } from './shorten-url-generator.service';
@@ -18,7 +20,7 @@ import {
 import { IUrl } from './interfaces/shorten-url-generator.interface';
 
 @ApiTags('Url Shortner')
-@Controller('shorten-url-generator')
+@Controller('url')
 export class ShortenUrlGeneratorController {
   constructor(private readonly urlService: ShortenUrlGeneratorService) {}
 
@@ -47,11 +49,15 @@ export class ShortenUrlGeneratorController {
     description: 'The original URL has been successfully retrieved.',
   })
   @ApiResponse({ status: 404, description: 'URL not found.' })
-  async findOne(@Param('shortenUrl') shortenUrl: string): Promise<IUrl> {
+  async findOne(
+    @Param('shortenUrl') shortenUrl: string,
+    @Res() res,
+  ): Promise<void> {
     const url = await this.urlService.findOne(shortenUrl);
+    console.log(url, 'url');
     if (!url) {
       throw new NotFoundException('URL not found');
     }
-    return url;
+    return res.redirect(url.original_url);
   }
 }

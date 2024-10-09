@@ -4,13 +4,16 @@ import { IUrl } from './interfaces/shorten-url-generator.interface';
 import { Model } from 'mongoose';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ShortenUrlGeneratorService {
-  constructor(@InjectModel('Url') private readonly urlModel: Model<IUrl>) {}
+  constructor(
+    @InjectModel('Url') private readonly urlModel: Model<IUrl>,
+    private readonly configService: ConfigService,
+  ) {}
 
   async create(createUrlDto: CreateUrlDto): Promise<IUrl> {
-    console.log(createUrlDto);
     const shortenUrl = uuidv4().slice(0, 8); // Generate a short ID
     const createdUrl = new this.urlModel({
       ...createUrlDto,
