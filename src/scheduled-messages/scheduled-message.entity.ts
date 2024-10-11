@@ -1,5 +1,8 @@
 import { Schema } from 'mongoose';
-import { ScheduleMessageStatus } from './enum/schedule-message.enum';
+import {
+  ScheduleMessageAction,
+  ScheduleMessageStatus,
+} from './enum/schedule-message.enum';
 
 const BodyVariableSchema = new Schema(
   {
@@ -19,6 +22,10 @@ const SchedulingSchema = new Schema(
   {
     action: {
       type: String,
+      enum: {
+        values: Object.keys(ScheduleMessageAction),
+        message: `{VALUE} is not supported.`,
+      },
       required: [true, 'action is required'],
     },
     day: {
@@ -56,11 +63,11 @@ const ScheduledMessageTemplateSchema = new Schema(
 
 const ScheduledMessageSchema = new Schema(
   {
-    contact_segments: {
-      type: [Schema.Types.ObjectId],
-      ref: 'ContactSegment',
-      required: [true, 'ContactSegment id is required'],
-    },
+    // contact_segments: {
+    //   type: [Schema.Types.ObjectId],
+    //   ref: 'ContactSegment',
+    //   required: [true, 'ContactSegment id is required'],
+    // },
 
     name: {
       type: String,
@@ -90,6 +97,10 @@ const ScheduledMessageSchema = new Schema(
     scheduling: {
       type: SchedulingSchema,
       required: [true, 'scheduling are required'],
+    },
+
+    scheduledQueueJobId: {
+      type: String,
     },
   },
   { timestamps: true },

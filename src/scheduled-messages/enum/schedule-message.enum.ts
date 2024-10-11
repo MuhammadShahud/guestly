@@ -5,3 +5,10 @@ export enum ScheduleMessageStatus {
   SENDING = 'SENDING',
   SENT = 'SENT',
 }
+
+export enum ScheduleMessageAction {
+  BIRTHDATE = 'BIRTHDATE',
+  CHECKIN = 'CHECKIN',
+  CHECKOUT = 'CHECKOUT',
+  DURING_STAY = 'DURING_STAY',
+}

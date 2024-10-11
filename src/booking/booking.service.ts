@@ -311,4 +311,8 @@ export class BookingService {
   async getBookingsByFilter(filter: FilterQuery<IBooking>) {
     return this.Booking.find(filter).populate('mainGuest');
   }
+
+  async findByQuery(filter: any) {
+    return await this.Booking.find(filter);
+  }
 }

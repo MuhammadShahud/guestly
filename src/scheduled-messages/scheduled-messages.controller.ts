@@ -20,6 +20,7 @@ import { CreateScheduledMessageDto } from './dto/create-scheduled-message.dto';
 import { ScheduledMessage } from './interfaces/scheduled-message.interface';
 import { ScheduledMessageService } from './scheduled-messages.service';
 import { UpdateScheduledMessageDto } from './dto/update-scheduled-message.dto';
+import { ScheduleMessageAction } from './enum/schedule-message.enum';
 
 @ApiTags('Scheduled Messages')
 @Controller('scheduled-messages')
@@ -27,6 +28,18 @@ export class ScheduledMessageController {
   constructor(
     private readonly scheduledMessageService: ScheduledMessageService,
   ) {}
+
+  @ApiOperation({ summary: 'Get hints for scheduling actions' })
+  @ApiQuery({
+    name: 'action',
+    required: true,
+    enum: ScheduleMessageAction,
+    description: 'The scheduling action for which to get hints',
+  })
+  @Get('hints')
+  getHints(@Query('action') action: ScheduleMessageAction): string {
+    return this.scheduledMessageService.getHintsForAction(action);
+  }
 
   @ApiOperation({ summary: 'Create a scheduled message' })
   @ApiResponse({

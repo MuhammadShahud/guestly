@@ -115,6 +115,19 @@ const BookingSchema = new Schema(
       type: [CommentSchema],
       default: [],
     },
+
+    checkin_messages: {
+      type: [String],
+      default: [],
+    },
+    checkout_messages: {
+      type: [String],
+      default: [],
+    },
+    during_messages: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true },
 );

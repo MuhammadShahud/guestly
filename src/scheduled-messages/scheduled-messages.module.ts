@@ -6,6 +6,8 @@ import { ScheduledMessageSchema } from './scheduled-message.entity';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduledMessagesProcessor } from './scheduled-message.processor';
+import { ContactsModule } from 'src/contacts/contacts.module';
+import { BookingModule } from 'src/booking/booking.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ScheduledMessagesProcessor } from './scheduled-message.processor';
     MongooseModule.forFeature([
       { name: 'ScheduledMessage', schema: ScheduledMessageSchema },
     ]),
+    ContactsModule,
+    BookingModule,
   ],
   controllers: [ScheduledMessageController],
   providers: [ScheduledMessageService, ScheduledMessagesProcessor],

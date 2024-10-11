@@ -255,4 +255,8 @@ export class ContactsService {
   async createContactFn(params: Object) {
     return await this.Contact.create(params);
   }
+
+  async findByQuery(filter: any) {
+    return await this.Contact.find(filter);
+  }
 }

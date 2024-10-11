@@ -28,4 +28,7 @@ export interface IBooking extends Document {
   source: 'PMS' | 'WA' | 'User';
   bussiness: IBuisness;
   comments: Comment[];
+  checkin_messages: String[];
+  checkout_messages: String[];
+  during_messages: String[];
 }

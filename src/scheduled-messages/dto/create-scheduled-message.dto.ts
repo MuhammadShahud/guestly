@@ -9,11 +9,16 @@ import {
   IsArray,
   Validate,
   IsBoolean,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { OneDefaultTemplateValidator } from 'src/broadcast/validation/defaultTemplate.validator';
-import { ScheduleMessageStatus } from '../enum/schedule-message.enum';
+import {
+  ScheduleMessageAction,
+  ScheduleMessageStatus,
+} from '../enum/schedule-message.enum';
+import { IsValidDay } from '../validators/day.validator';
 
 export class SMBodyVariableDto {
   @ApiProperty({
@@ -34,11 +39,15 @@ export class SMBodyVariableDto {
 }
 
 export class SchedulingDto {
+  @IsString()
   @ApiProperty({
     description: 'Action to be scheduled',
-    example: 'send',
+    enum: Object.keys(ScheduleMessageAction),
+    example: ScheduleMessageAction.BIRTHDATE,
   })
-  @IsString()
+  @IsEnum(Object.keys(ScheduleMessageAction), {
+    message: `{VALUE} is not supported, use ${Object.keys(ScheduleMessageAction)}.`,
+  })
   @IsNotEmpty({ message: 'action is required' })
   action: string;
 
@@ -46,8 +55,10 @@ export class SchedulingDto {
     description: 'Day of scheduling',
     example: 'Monday',
   })
+  @ValidateIf((o) => o.action !== ScheduleMessageAction.BIRTHDATE)
   @IsString()
   @IsOptional()
+  @IsValidDay({ message: 'Invalid day for the selected action' })
   day: string;
 
   @ApiProperty({
@@ -100,14 +111,14 @@ export class CreateScheduledMessageDto {
   @IsNotEmpty({ message: 'Please provide a name' })
   name: string;
 
-  @ApiProperty({
-    description: 'List of Contact segment ID',
-    example: ['seg1', 'seg2'],
-    type: [String],
-  })
-  @IsArray()
-  @IsString({ each: true })
-  contact_segments: string[];
+  // @ApiProperty({
+  //   description: 'List of Contact segment ID',
+  //   example: ['seg1', 'seg2'],
+  //   type: [String],
+  // })
+  // @IsArray()
+  // @IsString({ each: true })
+  // contact_segments: string[];
 
   @ApiProperty({
     description: 'List of templates used in the ScheduledMessage',

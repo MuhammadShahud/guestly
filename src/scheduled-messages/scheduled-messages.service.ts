@@ -4,12 +4,17 @@ import { Model } from 'mongoose';
 import { CreateScheduledMessageDto } from './dto/create-scheduled-message.dto';
 import { ScheduledMessage } from './interfaces/scheduled-message.interface';
 import { UpdateScheduledMessageDto } from './dto/update-scheduled-message.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { ScheduleMessageAction } from './enum/schedule-message.enum';
 
 @Injectable()
 export class ScheduledMessageService {
   constructor(
     @InjectModel('ScheduledMessage')
     private scheduledMessageModel: Model<ScheduledMessage>,
+    @InjectQueue('scheduled-messages')
+    private readonly scheduledMessagesQueue: Queue,
   ) {}
 
   async create(
@@ -18,6 +23,20 @@ export class ScheduledMessageService {
     const createdMessage = new this.scheduledMessageModel(
       createScheduledMessageDto,
     );
+
+    await this.scheduledMessagesQueue.add(
+      'schedule',
+      {
+        messageID: createdMessage._id,
+      },
+      {
+        attempts: 3,
+        delay: 2000,
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    );
+
     return createdMessage.save();
   }
 
@@ -71,6 +90,11 @@ export class ScheduledMessageService {
     const deletedMessage = await this.scheduledMessageModel
       .findOneAndDelete({ _id: id })
       .exec();
+
+    await this.scheduledMessagesQueue.removeJobs(
+      deletedMessage.scheduledQueueJobId,
+    );
+
     if (!deletedMessage) {
       throw new NotFoundException(`Scheduled Message with ID ${id} not found`);
     }
@@ -92,5 +116,20 @@ export class ScheduledMessageService {
       query.language = filters.language;
     }
     return query;
+  }
+
+  getHintsForAction(action: ScheduleMessageAction): string {
+    switch (action) {
+      case ScheduleMessageAction.CHECKIN:
+        return 'Choose an action and when to send the message. Day options: {14-1} days before, Day of, {14-1} days after.';
+      case ScheduleMessageAction.DURING_STAY:
+        return 'Choose an action and when to send the message. Day options: Monday-Sunday.';
+      case ScheduleMessageAction.CHECKOUT:
+        return 'Choose an action and when to send the message. Day options: {14-1} days before, Day of, {14-1} days after.';
+      case ScheduleMessageAction.BIRTHDATE:
+        return 'Choose an action and when to send the message. No day option available for birthdate.';
+      default:
+        return 'Choose an action and when to send the message.';
+    }
   }
 }

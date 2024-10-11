@@ -14,4 +14,5 @@ export interface ScheduledMessage extends Document {
   business: string;
   status: string;
   scheduling: { action: string; day: string; time: string };
+  scheduledQueueJobId: string;
 }
