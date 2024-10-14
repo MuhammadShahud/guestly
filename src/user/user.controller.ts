@@ -122,7 +122,7 @@ export class UserController {
   }
 
   @SwaggerDecorator('update the login user', true, true, 'code')
-  @AuthDecorator(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN)
+  @AuthDecorator(USER_ROLE.SUPER_ADMIN, USER_ROLE.MANAGER)
   @Get('/whatsapp/:code')
   async getCode(@Param('code') code: string, @GetUser() user: IUser) {
     console.log(code, '=============');

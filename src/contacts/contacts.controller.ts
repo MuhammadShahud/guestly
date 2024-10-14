@@ -26,7 +26,7 @@ import {
 @ApiTags('Contats')
 @Controller('contacts')
 export class ContactsController {
-  constructor(private readonly contactsService: ContactsService) {}
+  constructor(private readonly contactsService: ContactsService) { }
 
   @SwaggerDecorator('create contact', true)
   @AuthDecorator(USER_ROLE.SUPER_ADMIN)
@@ -67,6 +67,11 @@ export class ContactsController {
     name: 'search',
     required: false,
   })
+  @ApiQuery({ name: 'lastConversationFrom', required: false })
+  @ApiQuery({ name: 'lastConversationTo', required: false })
+  @ApiQuery({ name: 'marketingOptIn', required: false, enum: ['SUBSCRIBED', 'NON-SUBSCRIBED', 'UNSUBSCRIBED'] })
+  @ApiQuery({ name: 'sortField', required: false, enum: ['name', 'surName', 'createdAt', 'email'] })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   async findAll(
     @GetUser() user: IUser,
     @Query() query: pagination,
@@ -74,7 +79,12 @@ export class ContactsController {
     @Query('language') language: string,
     @Query('source') source: string,
     @Query('search') search: string,
-  ) {
+    @Query('lastConversationFrom') lastConversationFrom: string,
+    @Query('lastConversationTo') lastConversationTo: string,
+    @Query('marketingOptIn') marketingOptIn: string,
+    @Query('sortField') sortField: string = 'createdAt',
+    @Query('sortOrder') sortOrder: string = 'asc'
+    ) {
     return await this.contactsService.findAll(
       user,
       query,
@@ -82,7 +92,12 @@ export class ContactsController {
       language,
       source,
       search,
-    );
+      lastConversationFrom,
+      lastConversationTo,
+      marketingOptIn,
+      sortField,
+      sortOrder
+      );
   }
   @SwaggerDecorator('get comments', true)
   @Get('comments/:contactId')

@@ -6,7 +6,7 @@ export class AppService {
   getHello(request: Request): any {
     return {
       message: 'WELCOME TO GUESTLY APIS!',
-      headers: request.headers['cloudfront-viewer-country'],
+      headers: request.headers['cloudfront-viewer-country']
     };
   }
 }

@@ -1,11 +1,3 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
 import { compare } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import mongoose, { Model } from 'mongoose';
@@ -13,6 +5,9 @@ import { AppConfigService } from 'src/app-config/app-config.service';
 import { IAppConfig } from 'src/app-config/interface/app-config.interface';
 import { BuisnessService } from 'src/buisness/buisness.service';
 import { pagination } from 'src/common/interface/pagination';
+import {
+  ToolsIntegrationsService,
+} from 'src/tools-integrations/tools-integrations.service';
 import { ApiService } from 'src/utils/apiServise';
 import { EmailService } from 'src/utils/utils.emailService';
 import {
@@ -24,19 +19,26 @@ import {
 } from 'src/utils/utils.helper';
 import { S3Storage } from 'src/utils/utils.s3';
 import { SendGridService } from 'src/utils/utils.sendGridService';
+
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+
 import { ChangePasswordDto } from './dto/changePasword.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditInvitedUserDto } from './dto/edit-invited-user.dto';
 import { IniteUserDto } from './dto/invite-user-dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { IData, IUser } from './interfaces/user.interface';
-import { UpdateEmailDto } from './dto/update-email.dto';
 import { SwitchBuisnessDto } from './dto/switch-dto';
+import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdateInvitedUserDto } from './dto/update-invitedUser.dto';
-import { ToolsIntegrationsService } from 'src/tools-integrations/tools-integrations.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateWhatsappProfileDto } from './dto/update-whatsapp-profile.dto';
-// import MailerLite from '@mailerlite/mailerlite-nodejs';
-import { match } from 'assert';
+import { IUser } from './interfaces/user.interface';
 
 @Injectable()
 export class UserService {
@@ -419,11 +421,11 @@ export class UserService {
     const redirect_uri = this.configService.get<string>('FB_REDIRECT_URI');
     const apiUrl = 'https://graph.facebook.com/v12.0/oauth/access_token';
     const params = {
-      client_id: process.env.META_APP_ID,
+      client_id: '218446344509498',
       ...(!!redirect_uri && {
         redirect_uri: redirect_uri,
       }),
-      client_secret: process.env.META_APP_SECRET,
+      client_secret: 'd37ea20b0f44da5d222ab60d7b0b7eb8',
       code,
     };
     const [error, response] = await this.apiService.getApi(

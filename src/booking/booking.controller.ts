@@ -19,6 +19,8 @@ import { pagination } from 'src/common/interface/pagination';
 import { SwaggerDecorator } from 'src/common/decorators/api-decorater';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto, UpdateCommentDto } from './dto/create-comment.dto';
+
+
 @ApiTags('bookings')
 @Controller('booking')
 export class BookingController {
@@ -31,21 +33,32 @@ export class BookingController {
     return this.bookingService.create(createBookingDto, user);
   }
 
-  @SwaggerDecorator('get booking', true)
+  @SwaggerDecorator('get the booking', true)
   @AuthDecorator(USER_ROLE.SUPER_ADMIN)
   @Get()
-  findAll(
+  async findAll(
     @GetUser() user: IUser,
     @Query() query: pagination,
-    @Query('from') from: string,
-    @Query('to') to: string,
-    @Query('treatment') treatment: string,
-    @Query('status') status: string,
-    @Query('children') children: string,
-    @Query('search') search: string,
-    @Query('filter') filter: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('treatment') treatment?: string,
+    @Query('children') children?: string,
+    @Query('search') search?: string,
+    @Query('filter') filter?: string,
+    @Query('status') status?: string,
+    @Query('group') group: 'IN-HOUSE' | 'CHECKING-IN' | 'CHECKING-OUT' | 'ARRIVING-SOON' | 'CANCELLED' | 'ALL' = 'ALL',
+    @Query('sortBy') sortBy: 'checkIn' | 'checkOut' | 'createdAt' = 'createdAt',
+    @Query('sortOrder') sortOrder: 'asc' | 'desc' = 'desc'
   ) {
-    return this.bookingService.findAll(
+    from = from == "null" ? null : from
+    to = to == "null" ? null : to
+    treatment = treatment == "null" ? null : treatment
+    children = children == "null" ? null : children
+    search = search == "null" ? null : search
+    filter = filter == "null" ? null : filter
+    status = status == "null" ? null : status
+    status = status == "null" ? null : status
+    const bookings = await this.bookingService.findAllNew(
       user,
       query,
       from,
@@ -55,9 +68,33 @@ export class BookingController {
       search,
       filter,
       status,
+      group,
+      sortBy,
+      sortOrder
     );
+
+    return {
+      success: true,
+      data: bookings.data,
+      meta: {
+        totalCount: bookings.totalCount,
+        allFilteredIds: bookings.allFilteredIds,
+        counts: {
+          inHouse: bookings.inHouse,
+          checkingOut: bookings.checkingOut,
+          arrivingSoon: bookings.arrivingSoon,
+          cancelled: bookings.cancelled,
+          all: bookings.all,
+        },
+        pagination: {
+          currentPage: query.page || 1,
+          pageSize: query.limit || 50,
+          totalPages: Math.ceil(bookings.totalCount / (query.limit || 50)),
+        },
+      },
+    };
   }
-  
+
   @AuthDecorator(USER_ROLE.SUPER_ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {

@@ -18,7 +18,7 @@ import { AuthDecorator } from 'src/common/decorators/auth-decorater';
 import { USER_ROLE } from 'src/auth/enums/enums';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { S3Storage } from 'src/utils/utils.s3';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 @ApiTags('tasks')
 @Controller('tasks')
 export class TasksController {
@@ -45,30 +45,14 @@ export class TasksController {
     return this.tasksService.create(createTaskDto);
   }
 
-  @SwaggerDecorator('get all task for a contact', true)
+  @SwaggerDecorator('get all task for a contatc', true)
   @AuthDecorator(USER_ROLE.SUPER_ADMIN)
   @Get()
-  @ApiQuery({
-    name: 'contactId',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'assigne',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'tags',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-  })
   async getTaskByContact(
     @Query('contactId') contactId: string,
-    @Query('assigne') assigne?: string,
-    @Query('tags') tags?: string,
-    @Query('search') search?: string,
+    @Query('assigne') assigne: string,
+    @Query('tags') tags: string,
+    @Query('search') search: string,
   ) {
     return await this.tasksService.getTaskByContact(
       contactId,
@@ -90,23 +74,17 @@ export class TasksController {
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'attachments', maxCount: 1 }]),
   )
-  @ApiQuery({
-    name: 'taskId',
-    required: true,
-  })
   @Patch()
   async update(
     @Body() updateTaskDto: UpdateTaskDto,
     @UploadedFiles() attachments: Express.Multer.File[],
-    @Query('taskId') id: string,
   ) {
     const uploadFiles = await this.s3Storage.uploadFiles(attachments);
-    console.log(updateTaskDto);
 
     if (!!uploadFiles?.attachments)
       updateTaskDto.attachment = uploadFiles?.attachments?.map((key) => key);
 
-    return await this.tasksService.update(updateTaskDto, id);
+    return await this.tasksService.update(updateTaskDto);
   }
 
   @SwaggerDecorator('delete task', true)

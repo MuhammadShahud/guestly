@@ -1,9 +1,12 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { CreateTaskDto } from './create-task.dto';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ApiProperty, IntersectionType, PartialType } from '@nestjs/swagger';
 
 export class UpdateTaskDto extends PartialType(CreateTaskDto) {
-  @ApiProperty({ default: [] })
-  @IsOptional({ message: 'delete media array' })
-  deletedMedia?: string[];
+  @IsNotEmpty({ message: 'Please provide taskId' })
+  @IsString()
+  taskId: string;
+
+  @IsOptional({ message: 'Please provide taskId' })
+  deletedMedia: string[];
 }

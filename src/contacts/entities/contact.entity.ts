@@ -39,7 +39,7 @@ const contactSchema = new Schema(
     gender: {
       type: String,
       enum: {
-        values: ['male', 'female', 'other'],
+        values: ['male', 'female', 'others'],
         message: `{VALUE} is not supported.`,
       },
     },

@@ -198,6 +198,158 @@ export class BookingService {
       cancelled,
     };
   }
+  
+  async findAllNew(
+    user: IUser,
+    query: pagination,
+    from?: string,
+    to?: string,
+    treatment?: string,
+    children?: string,
+    search?: string,
+    filter?: string,
+    status?: string,
+    group: "IN-HOUSE" | "CHECKING-IN" | "CHECKING-OUT" | "ARRIVING-SOON" | "CANCELLED" | "ALL" = "ALL",
+    sortBy: "checkIn" | "checkOut" | "createdAt" = "createdAt",
+    sortOrder: "asc" | "desc" = "desc"
+  ): Promise<{
+    data: IBooking[];
+    totalCount: number;
+    allFilteredIds: string[];
+    inHouse: number;
+    checkingOut: number;
+    arrivingSoon: number;
+    cancelled: number;
+    all: number;
+  }> {
+    const { limit, skip } = _pagination(query);
+    const today = moment().startOf('day');
+    const tomorrow = moment().add(1, 'day').startOf('day');
+
+    const baseQuery = {
+      bussiness: user?.currentBuisness._id,
+      ...(from && to ? {
+        $or: [
+          { checkIn: { $gte: new Date(from), $lte: new Date(to) } },
+          { checkOut: { $gte: new Date(from), $lte: new Date(to) } },
+        ],
+      } : {}),
+      ...(treatment && { treatment: { $in: treatment.split(',') } }),
+      ...(status && { status: { $in: status.split(',') } }),
+      ...(children === 'true' && { children: { $gt: 0 } }),
+      ...(filter && filter !== 'all' && buisnessFilter(filter)),
+    };
+
+    const groupQuery = {
+      ...baseQuery,
+      ...({
+        "IN-HOUSE": { checkIn: { $lte: today.toDate() }, checkOut: { $gt: today.toDate() } },
+        "CHECKING-OUT": { checkOut: { $gte: today.toDate(), $lt: tomorrow.toDate() } },
+        "ARRIVING-SOON": { checkIn: { $gte: today.toDate(), $lt: tomorrow.add(1, 'day').toDate() } },
+        "CANCELLED": { status: 'cancelled' },
+        "ALL": {},
+      }[group] || {}),
+    };
+
+    const searchStage = search ? {
+      $match: {
+        $or: [
+          { 'mainGuest.name': { $regex: search, $options: 'i' } },
+          { 'mainGuest.surName': { $regex: search, $options: 'i' } },
+        ],
+      },
+    } : { $match: {} };
+
+    const sortStage = {
+      $sort: { [sortBy]: sortOrder === 'asc' ? 1 as any : -1 as any }
+    };
+
+    const pipeline = [
+      { $match: groupQuery },
+      {
+        $lookup: {
+          from: 'contacts',
+          localField: 'mainGuest',
+          foreignField: '_id',
+          as: 'mainGuest',
+        },
+      },
+      { $unwind: { path: '$mainGuest', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'contacts',
+          localField: 'additionalGuests',
+          foreignField: '_id',
+          as: 'additionalGuests',
+        },
+      },
+      searchStage,
+      sortStage,
+    ];
+
+    const [result, counts] = await Promise.all([
+      this.Booking.aggregate([
+        {
+          $facet: {
+            data: [...pipeline, { $skip: skip }, { $limit: limit }],
+            allFilteredIds: [...pipeline, { $project: { _id: 1 as any } }],
+            totalCount: [...pipeline, { $count: 'total' }],
+          },
+        },
+      ]),
+
+      this.Booking.aggregate([
+        {
+          $facet: {
+            inHouse: [
+              { $match: { ...baseQuery, checkIn: { $lte: today.toDate() }, checkOut: { $gt: today.toDate() } } },
+              { $count: 'total' },
+            ],
+            checkingOut: [
+              { $match: { ...baseQuery, checkOut: { $gte: today.toDate(), $lt: tomorrow.toDate() } } },
+              { $count: 'total' },
+            ],
+            arrivingSoon: [
+              { $match: { ...baseQuery, checkIn: { $gte: today.toDate(), $lt: tomorrow.add(1, 'day').toDate() } } },
+              { $count: 'total' },
+            ],
+            cancelled: [
+              { $match: { ...baseQuery, status: 'cancelled' } },
+              { $count: 'total' },
+            ],
+            all: [
+              { $match: baseQuery },
+              { $count: 'total' },
+            ],
+          },
+        },
+      ]),
+    ]);
+
+    const [data] = result;
+    const [countsData] = counts;
+
+    await Promise.all(
+      data.data.map(async (booking) => {
+        await this.Booking.populate(booking, {
+          path: 'comments.user',
+          select: 'email image name',
+        });
+      }),
+    );
+
+    return {
+      data: data.data,
+      totalCount: data.totalCount[0]?.total || 0,
+      allFilteredIds: data.allFilteredIds.map(item => item._id.toString()),
+      inHouse: countsData.inHouse[0]?.total || 0,
+      checkingOut: countsData.checkingOut[0]?.total || 0,
+      arrivingSoon: countsData.arrivingSoon[0]?.total || 0,
+      cancelled: countsData.cancelled[0]?.total || 0,
+      all: countsData.all[0]?.total || 0,
+    };
+  }
+
 
   async findOne(id: string) {
     console.log('id', id);

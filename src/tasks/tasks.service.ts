@@ -37,17 +37,14 @@ export class TasksService {
     return task;
   }
 
-  async update(updateTaskDto: UpdateTaskDto, id: string) {
-    const { deletedMedia, ...rest } = updateTaskDto;
-    console.log(id);
-    const task = await this.Task.findById(id);
-    console.log(deletedMedia, rest);
+  async update(updateTaskDto: UpdateTaskDto) {
+    const { taskId, deletedMedia, ...rest } = updateTaskDto;
+
+    const task = await this.Task.findById(taskId);
+
     if (!task) throw new BadRequestException('No task found');
 
-    if (
-      rest?.attachment?.length > 0 ||
-      (Boolean(deletedMedia) && deletedMedia?.length > 0)
-    ) {
+    if (rest.attachment.length > 0 || deletedMedia.length > 0) {
       const newMedia = manageNewAttachment(
         task?.attachment,
         rest.attachment,
@@ -56,7 +53,7 @@ export class TasksService {
 
       rest.attachment = newMedia;
     }
-    const updatedTask = await this.Task.findByIdAndUpdate(id, rest, {
+    const updatedTask = await this.Task.findByIdAndUpdate(taskId, rest, {
       new: true,
     });
 

@@ -12,7 +12,7 @@ import chalk from 'chalk';
           '<PASSWORD>',
           conffigService.get('DATABSE_PASSWORD'),
         );
-
+        console.log(chalk.yellow('DATABSE IS CONNECTED'));
         return { uri };
       },
       inject: [ConfigService],
