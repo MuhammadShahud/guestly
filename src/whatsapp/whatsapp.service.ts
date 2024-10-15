@@ -25,6 +25,10 @@ import {
 import { BookingService } from 'src/booking/booking.service';
 import { IContact } from 'src/contacts/interface/contact.interface';
 import { TemplateService } from 'src/templates/templates.service';
+import { TMessage } from './interface/message.interface';
+import { MessageService } from 'src/chat/message.service';
+import { RoomService } from 'src/chat/room.service';
+import { MessageType } from 'src/chat/enums/messge.enum';
 
 @Injectable()
 export class WhatsappService {
@@ -41,6 +45,8 @@ export class WhatsappService {
     private readonly bookingService: BookingService,
     @Inject(forwardRef(() => TemplateService))
     private readonly templateService: TemplateService,
+    private readonly messageService: MessageService,
+    private readonly roomService: RoomService,
   ) {}
 
   private createTemplateURL = (wab_id: string) =>
@@ -185,7 +191,7 @@ export class WhatsappService {
             // Initialize chat room
             const room = await this.chatService.initializeChat(
               _business.owner._id,
-              contact,
+              contact._id,
             );
 
             // Loop through each message and handle the type
@@ -195,24 +201,27 @@ export class WhatsappService {
 
               // Check if the message is a forwarded text
               if (message.type === 'text') {
-                if (message.context?.forwarded) {
+                if (message.context?.message_id) {
                   isForwarded = true;
                 }
-                await this.chatService.createChat(
-                  room.data._id,
-                  'text',
-                  message.text.body,
-                  isForwarded,
-                  _business.owner._id,
-                  contact._id,
-                );
+                // await this.chatService.createChat({
+                //   room: room._id,
+                //   message: {
+                //     message: message.text.body,
+                //     type: 'text',
+                //     isforwarded: isForwarded,
+                //   },
+                //   to: _business.owner._id,
+                //   from: contact._id,
+                //   replyTo: message.context?.message_id,
+                // });
               }
 
               // Check if the message is an audio message
               if (message.type === 'audio') {
                 await this.downloadWhatsAppMedia(
                   message.audio.id,
-                  'YOUR_ACCESS_TOKEN',
+                  this.configService.get('WHATSAPP_API_TOKEN'),
                 );
               }
 
@@ -220,7 +229,7 @@ export class WhatsappService {
               if (message.type === 'image') {
                 await this.downloadWhatsAppMedia(
                   message.image.id,
-                  'YOUR_ACCESS_TOKEN',
+                  this.configService.get('WHATSAPP_API_TOKEN'),
                 );
               }
 
@@ -228,7 +237,7 @@ export class WhatsappService {
               if (message.type === 'video') {
                 await this.downloadWhatsAppMedia(
                   message.video.id,
-                  'YOUR_ACCESS_TOKEN',
+                  this.configService.get('WHATSAPP_API_TOKEN'),
                 );
               }
             }
@@ -357,7 +366,7 @@ export class WhatsappService {
     return res;
   }
 
-  async sendMessage(
+  async sendTemplateMessage(
     contact: string,
     template: BroadcastTemplate,
     business: string,
@@ -410,6 +419,10 @@ export class WhatsappService {
       buisness: business,
     });
 
+    const toolsNIn = await this.toolsAndIntegration.getTandIFn({
+      buisness: business,
+    });
+
     const body_parameters = template.body_variables.map((v) => {
       return { type: 'text', text: v.value };
     });
@@ -421,8 +434,97 @@ export class WhatsappService {
     );
 
     const [err, res] = await this.apiService.postApi(
-      this.createMessageURL(from_contact.phoneNo),
+      this.createMessageURL(toolsNIn.whatsapp.phoneNumberId),
       message,
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.configService.get('WHATSAPP_API_TOKEN')}`,
+      },
+    );
+    if (err) {
+      console.error(`Error sending message to ${contact}:`, err);
+      return { success: false, contact };
+    }
+
+    return { success: true, contact };
+  }
+
+  async sendMessageByType(messageId: string) {
+    const message = await this.messageService.getMessageByFilter({
+      _id: messageId,
+    });
+
+    if (!message) {
+      throw new Error('Message not found.');
+    }
+
+    const room = await this.roomService.getRoomByFilter({
+      _id: message.room,
+    });
+
+    if (!room) {
+      throw new Error('Room not found.');
+    }
+
+    const contact = await this.contactService.getContactFn({
+      _id: message.contact,
+    });
+
+    if (!contact) {
+      throw new Error('Contact not found.');
+    }
+
+    const business = await this.buisnessService.getBuisnessById(
+      String(room.buisness),
+    );
+
+    const toolsNIn = await this.toolsAndIntegration.getTandIFn({
+      buisness: String(room.buisness),
+    });
+
+    let w_message: TMessage = {
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: contact.phoneNo,
+      type: message.message.type,
+    };
+
+    const msg_type = message.message.type;
+
+    if (msg_type == MessageType.TEXT) {
+      w_message['text'] = { body: message.message.message, preview_url: false };
+    }
+
+    if (msg_type == MessageType.IMAGE) {
+      w_message['image'] = {
+        link: message.message.imageUrl,
+        id: message.message.whatsapp_image_id,
+      };
+    }
+
+    if (msg_type == MessageType.AUDIO) {
+      w_message['audio'] = {
+        link: message.message.audioUrl,
+        id: message.message.whatsapp_audio_id,
+      };
+    }
+
+    if (msg_type == MessageType.VIDEO) {
+      w_message['video'] = {
+        link: message.message.videoUrl,
+        id: message.message.whatsapp_video_id,
+      };
+    }
+
+    if (message.replyTo) {
+      w_message['context'] = {
+        message_id: message.message.whatsapp_message_id,
+      };
+    }
+
+    const [err, res] = await this.apiService.postApi(
+      this.createMessageURL(toolsNIn.whatsapp.phoneNumberId),
+      w_message,
       {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.configService.get('WHATSAPP_API_TOKEN')}`,

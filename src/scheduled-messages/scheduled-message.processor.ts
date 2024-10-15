@@ -373,7 +373,7 @@ export class ScheduledMessagesProcessor {
     const { template, contact, business } = job.data;
     this.logger.log(`Processing job ${job.id} for Contact ID: ${contact}`);
 
-    await this.whatsappService.sendMessage(contact, template, business);
+    await this.whatsappService.sendTemplateMessage(contact, template, business);
     try {
     } catch (error) {
       throw error; // Rethrow to allow Bull to handle retries

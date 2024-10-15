@@ -129,7 +129,11 @@ export class CampaignProcessor {
     this.logger.log(`Processing job ${job.id} for Contact ID: ${contact}`);
 
     try {
-      await this.whatsappService.sendMessage(contact, template, business);
+      await this.whatsappService.sendTemplateMessage(
+        contact,
+        template,
+        business,
+      );
     } catch (error) {
       throw error; // Rethrow to allow Bull to handle retries
     }
