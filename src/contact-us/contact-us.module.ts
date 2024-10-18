@@ -11,6 +11,6 @@ import { SendGridService } from 'src/utils/utils.sendGridService';
     MongooseModule.forFeature([{ name: 'ContactUs', schema: ContactUsSchema }]),
   ],
   controllers: [ContactUsController],
-  providers: [ContactUsService, SendGridService],
+  providers: [ContactUsService, SendGridService, ConfigModule],
 })
 export class ContactUsModule {}

@@ -5,19 +5,24 @@ import { CreateContactUsDto } from './dto/create-contact-us.dto';
 import { UpdateContactUsDto } from './dto/update-contact-us.dto';
 import { ContactUs } from './interfaces/contact-us.interface';
 import { SendGridService } from 'src/utils/utils.sendGridService';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ContactUsService {
   constructor(
     @InjectModel('ContactUs') private readonly contactUsModel: Model<ContactUs>,
     private readonly sendGridServce: SendGridService,
+    private readonly configServce: ConfigService,
   ) {}
 
   async create(createContactUsDto: CreateContactUsDto): Promise<ContactUs> {
     const createdContactUs = new this.contactUsModel(createContactUsDto);
     const savedContact = await createdContactUs.save();
     await this.sendGridServce.sendContctUsMail(
-      { to: 'musamaamjadb@gmail.com', subject: 'New Contact Us Submission' },
+      {
+        to: this.configServce.get('CONTACT_TO_EMAIL'),
+        subject: 'New Contact Us Submission',
+      },
       savedContact,
     );
     return savedContact;
