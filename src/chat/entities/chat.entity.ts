@@ -36,7 +36,10 @@ const messageSchema = new Schema(
       type: String,
     },
     whatsapp_message_id: {
-      type: Boolean,
+      type: String,
+    },
+    whatsapp_message_status: {
+      type: String,
     },
   },
   { timestamps: true },

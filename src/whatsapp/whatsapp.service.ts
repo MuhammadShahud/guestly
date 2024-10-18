@@ -29,6 +29,7 @@ import { TMessage } from './interface/message.interface';
 import { MessageService } from 'src/chat/message.service';
 import { RoomService } from 'src/chat/room.service';
 import { MessageType } from 'src/chat/enums/messge.enum';
+import { IChat } from 'src/chat/interfaces/chat.interface';
 
 @Injectable()
 export class WhatsappService {
@@ -197,64 +198,98 @@ export class WhatsappService {
             // Loop through each message and handle the type
             for (let index = 0; index < messages.length; index++) {
               const message = messages[index];
-              let isForwarded = false;
+
+              let newMessage = await this.messageService.create({
+                user: contact?._id,
+                from: contact?._id,
+                room: room._id,
+              });
+
+              newMessage['message']['whatsapp_message_id'] = message.id;
+
+              if (message.context?.forwarded) {
+                newMessage['message']['isforwarded'] = true;
+              }
+
+              if (message?.context?.message_id) {
+                const db_msg = await this.messageService.getMessageByFilter({
+                  'message.whatsapp_message_id': message?.context?.message_id,
+                });
+
+                newMessage['replyTo'] = db_msg._id;
+              }
 
               // Check if the message is a forwarded text
-              if (message.type === 'text') {
-                if (message.context?.message_id) {
-                  isForwarded = true;
-                }
-                // await this.chatService.createChat({
-                //   room: room._id,
-                //   message: {
-                //     message: message.text.body,
-                //     type: 'text',
-                //     isforwarded: isForwarded,
-                //   },
-                //   to: _business.owner._id,
-                //   from: contact._id,
-                //   replyTo: message.context?.message_id,
-                // });
+              if (message.type === MessageType.TEXT) {
+                newMessage['message']['message'] = message?.text?.body;
+                newMessage['message']['type'] = MessageType.TEXT;
               }
 
               // Check if the message is an audio message
-              if (message.type === 'audio') {
-                await this.downloadWhatsAppMedia(
+              if (message.type === MessageType.AUDIO) {
+                const uploaded = await this.downloadWhatsAppMedia(
                   message.audio.id,
                   this.configService.get('WHATSAPP_API_TOKEN'),
                 );
+
+                newMessage['message']['type'] = MessageType.AUDIO;
+                newMessage['message']['audioUrl'] = JSON.stringify(uploaded);
+                newMessage['message']['whatsapp_audio_id'] = message.audio.id;
               }
 
               // Check if the message is an image
               if (message.type === 'image') {
-                await this.downloadWhatsAppMedia(
+                const uploaded = await this.downloadWhatsAppMedia(
                   message.image.id,
                   this.configService.get('WHATSAPP_API_TOKEN'),
                 );
+
+                newMessage['message']['type'] = MessageType.IMAGE;
+                newMessage['message']['imageUrl'] = JSON.stringify(uploaded);
+                newMessage['message']['caption'] = message?.image?.caption;
+                newMessage['message']['whatsapp_image_id'] = message.image.id;
               }
 
               // Check if the message is a video
               if (message.type === 'video') {
-                await this.downloadWhatsAppMedia(
+                const uploaded = await this.downloadWhatsAppMedia(
                   message.video.id,
                   this.configService.get('WHATSAPP_API_TOKEN'),
                 );
+                newMessage['message']['type'] = MessageType.VIDEO;
+                newMessage['message']['videoUrl'] = JSON.stringify(uploaded);
+                newMessage['message']['whatsapp_video_id'] = message.video.id;
               }
+
+              await newMessage.save();
+            }
+          }
+
+          if ('statuses' in element.value) {
+            const { statuses, metadata } = element.value;
+            for (let i = 0; i < statuses.length; i++) {
+              const msg = statuses[i];
+
+              const db_msg = await this.messageService.getMessageByFilter({
+                'message.whatsapp_message_id': msg,
+              });
+              db_msg.message.whatsapp_message_status = msg.status;
+              await db_msg.save();
             }
           }
 
           return { message: 'Webhook worked successfully' };
         }
-      }
-    }
 
-    if (body?.field == 'message_template_status_update') {
-      await this.templateService.updateByFilter(
-        {
-          whatsAppTemplateId: body.value.message_template_id,
-        },
-        { status: body.value.status },
-      );
+        if (element.field == 'message_template_status_update') {
+          await this.templateService.updateByFilter(
+            {
+              whatsAppTemplateId: element.value.message_template_id,
+            },
+            { status: element.value.status },
+          );
+        }
+      }
     }
   }
 
@@ -293,7 +328,9 @@ export class WhatsappService {
 
     const uploadFiles = await this.s3Service.uploadFiles(fileData);
 
-    const keys = uploadFiles;
+    const keys = uploadFiles?.attachments?.map((key) => key);
+
+    return keys;
   }
 
   async createWhatsappTemplate(t: ITemplate) {

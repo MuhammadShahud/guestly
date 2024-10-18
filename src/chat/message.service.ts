@@ -15,6 +15,10 @@ export class MessageService {
     private readonly roomService: RoomService,
   ) {}
 
+  async create(docs): Promise<IChat> {
+    return this.chatModel.create(docs);
+  }
+
   async sendMessage(createMessageDto: CreateMessageDto): Promise<IChat> {
     try {
       const newMessage = new this.chatModel({

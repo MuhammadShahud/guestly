@@ -10,6 +10,7 @@ type Message = {
   videoUrl?: string;
   audioUrl?: string;
   caption?: string;
+  whatsapp_message_status?: string;
   whatsapp_message_id?: string;
   whatsapp_image_id?: string;
   whatsapp_video_id?: string;
@@ -17,12 +18,12 @@ type Message = {
 };
 
 export interface IChat extends Document {
-  message: Message;
-  user: IUser;
-  contact: IContact;
-  room: string;
+  message?: Message;
+  user?: IUser;
+  contact?: IContact;
+  room?: string;
   replyTo?: string;
-  from: string;
-  to: string;
-  isSeen: boolean;
+  from?: string;
+  to?: string;
+  isSeen?: boolean;
 }
