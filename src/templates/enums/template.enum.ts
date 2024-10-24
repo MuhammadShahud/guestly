@@ -1,7 +1,7 @@
 export enum TemplateCategoryEnum {
-  AUTHENTICATION = 'AUTHENTICATION',
   MARKETING = 'MARKETING',
-  UTILITY = 'UTILITY',
+  // AUTHENTICATION = 'AUTHENTICATION',
+  // UTILITY = 'UTILITY',
 }
 
 export enum TemplateContentTypeEnum {
@@ -17,8 +17,8 @@ export enum TemplateLanguage {
 }
 
 export enum TemplateButtonTypeEnum {
-  PHONE_NUMBER = 'PHONE_NUMBER',
   URL = 'URL',
+  PHONE_NUMBER = 'PHONE_NUMBER',
   QUICK_REPLY = 'QUICK_REPLY',
   CALL_TO_ACTION = 'CALL_TO_ACTION',
 }

@@ -37,7 +37,7 @@ class TemplateHeaderDto {
 
 class TemplateButtonDto {
   @ApiProperty({
-    example: 'QUICK_REPLY',
+    example: TemplateButtonTypeEnum.URL,
     description: 'The type of the button',
     enum: TemplateButtonTypeEnum,
     enumName: 'TemplateButtonTypeEnum',
@@ -77,20 +77,20 @@ class BodyVariableDto {
 
 export class CreateTemplateDto {
   @ApiProperty({
-    example: 'My Template',
+    example: 'my_test_template',
     description: 'The name of the template',
   })
   @IsString()
   readonly name: string;
 
+  @IsEnum(TemplateCategoryEnum)
   @ApiProperty({
-    example: 'MARKETING',
+    example: TemplateCategoryEnum.MARKETING,
     description: 'The category of the template',
     enum: TemplateCategoryEnum,
     enumName: 'TemplateCategoryEnum',
   })
   @IsString()
-  @IsEnum(TemplateCategoryEnum)
   readonly category: string;
 
   @ApiProperty({ example: 'en', description: 'The language of the template' })
@@ -109,7 +109,7 @@ export class CreateTemplateDto {
   readonly header?: TemplateHeaderDto;
 
   @ApiProperty({
-    example: '<p>Hello, World!</p>',
+    example: '<p>Hello{{1}}, World!</p>',
     description: 'The raw HTML body of the template',
     required: false,
   })
@@ -154,6 +154,7 @@ export class CreateTemplateDto {
   @ApiProperty({
     description: 'The ID of the user who created the template',
     required: false,
+    default: '66f012d025ad2e5c3d909ebc',
   })
   @IsOptional()
   @IsString()

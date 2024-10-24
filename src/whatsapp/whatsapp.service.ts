@@ -60,6 +60,14 @@ export class WhatsappService {
     `${this.configService.get('FACEBOOK_URL')}/${phone_id}`;
 
   private createTemplate = async (t: ITemplate) => {
+    const regex = /{{\s*(.*?)\s*}}/g;
+
+    const matches = [];
+    let match;
+    while ((match = regex.exec(t.raw_html_body)) !== null) {
+      matches.push(match[1]); // match[1] contains the content inside {{ }}
+    }
+    console.log(matches);
     return {
       name: t.name,
       language: t.language,
@@ -71,9 +79,9 @@ export class WhatsappService {
                 type: 'HEADER',
                 format: 'TEXT',
                 text: t.header.content_value,
-                example: {
-                  header_text: ['Summer Sale'],
-                },
+                // example: {
+                //   header_text: ['Summer Sale'],
+                // },
               },
             ]
           : []),
@@ -93,9 +101,11 @@ export class WhatsappService {
         {
           type: 'BODY',
           text: t.raw_html_body,
-          example: {
-            body_text: [t.body_variables.map((v) => v.default_value)],
-          },
+          ...(matches.length > 0 && {
+            example: {
+              body_text: [t.body_variables.map((v) => v.default_value)],
+            },
+          }),
         },
         { type: 'FOOTER', text: t.footer },
         {
@@ -105,7 +115,7 @@ export class WhatsappService {
             text: b.text,
             ...(b.type === TemplateButtonTypeEnum.URL && {
               url: b.value,
-              example: ['summer2023'],
+              // example: ['summer2023'],
             }),
             ...(b.type === TemplateButtonTypeEnum.PHONE_NUMBER && {
               phone_number: b.value,
