@@ -358,9 +358,14 @@ export class WhatsappService {
     );
 
     if (err && err['response']) {
-      throw new Error(
-        `${err['response']['data']['error']['error_user_title']}, ${err['response']['data']['error']['error_user_msg']}`,
-      );
+      const errorMessage =
+        err['response'].data.error.message || 'Unknown error';
+      const errorUserTitle =
+        err['response'].data.error.error_user_title || 'Error';
+      const errorUserMsg =
+        err['response'].data.error.error_user_msg || 'An error occurred';
+
+      throw new Error(`${errorMessage}, ${errorUserTitle}, ${errorUserMsg}`);
     }
     return res;
   }
