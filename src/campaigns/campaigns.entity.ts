@@ -61,18 +61,18 @@ const CampaignSchema = new Schema(
     contact_segments: {
       type: [Schema.Types.ObjectId],
       ref: 'ContactSegment',
-      required: [true, 'ContactSegment id is required'],
+      // required: [true, 'ContactSegment id is required'],
     },
 
     templates: {
       type: [CampaignTemplateSchema],
-      required: [true, 'templates are required'],
+      // required: [true, 'templates are required'],
     },
 
     business: {
       type: Schema.Types.ObjectId,
       ref: 'Buisness',
-      required: [true, 'business id are required'],
+      // required: [true, 'business id are required'],
     },
     status: {
       type: String,
@@ -87,7 +87,7 @@ const CampaignSchema = new Schema(
     },
     scheduling: {
       type: SchedulingSchema,
-      required: [true, 'scheduling are required'],
+      // required: [true, 'scheduling are required'],
     },
   },
   { timestamps: true },

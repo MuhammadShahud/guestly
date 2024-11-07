@@ -107,21 +107,25 @@ export class WhatsappService {
             },
           }),
         },
-        { type: 'FOOTER', text: t.footer },
-        {
-          type: 'BUTTONS',
-          buttons: t.buttons.map((b) => ({
-            type: b.type === TemplateButtonTypeEnum.URL ? 'URL' : b.type,
-            text: b.text,
-            ...(b.type === TemplateButtonTypeEnum.URL && {
-              url: b.value,
-              // example: ['summer2023'],
-            }),
-            ...(b.type === TemplateButtonTypeEnum.PHONE_NUMBER && {
-              phone_number: b.value,
-            }),
-          })),
-        },
+        ...(t?.footer ? [{ type: 'FOOTER', text: t.footer }] : []),
+        ...(t.buttons.length > 0
+          ? [
+              {
+                type: 'BUTTONS',
+                buttons: t.buttons.map((b) => ({
+                  type: b.type === TemplateButtonTypeEnum.URL ? 'URL' : b.type,
+                  text: b.text,
+                  ...(b.type === TemplateButtonTypeEnum.URL && {
+                    url: b.value,
+                    // example: ['summer2023'],
+                  }),
+                  ...(b.type === TemplateButtonTypeEnum.PHONE_NUMBER && {
+                    phone_number: b.value,
+                  }),
+                })),
+              },
+            ]
+          : []),
       ],
     };
   };

@@ -10,6 +10,7 @@ import { ITemplate } from './interfaces/template.interface';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
 import { WhatsappService } from 'src/whatsapp/whatsapp.service';
+import { TemplateStatusEnum } from './enums/template.enum';
 
 @Injectable()
 export class TemplateService {
@@ -33,7 +34,10 @@ export class TemplateService {
 
     const createdTemplate = new this.templateModel(createTemplateDto);
 
-    if (createdTemplate) {
+    if (
+      createdTemplate &&
+      createdTemplate.status == TemplateStatusEnum.SUBMITTED
+    ) {
       const t =
         await this.whatsappService.createWhatsappTemplate(createdTemplate);
 
@@ -111,7 +115,11 @@ export class TemplateService {
       .findByIdAndUpdate(id, updateTemplateDto, { new: true })
       .exec();
 
-    if (existingTemplate && existingTemplate.whatsAppTemplateId) {
+    if (
+      existingTemplate &&
+      existingTemplate.whatsAppTemplateId &&
+      existingTemplate.status == TemplateStatusEnum.SUBMITTED
+    ) {
       await this.whatsappService.updateWhatsappTemplate(existingTemplate);
 
       const t = await this.whatsappService.getTempleteById(

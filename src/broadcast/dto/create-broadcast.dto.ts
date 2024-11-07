@@ -43,22 +43,9 @@ export class CreateBroadcastDto {
   @ApiProperty({
     description: 'Status of the broadcast',
     enum: BroadcastStatus,
-    example: BroadcastStatus.PENDING,
+    example: BroadcastStatus.SCHEDULED,
+    default: BroadcastStatus.SCHEDULED,
   })
   @IsEnum(BroadcastStatus)
   status: BroadcastStatus;
-
-  @ApiProperty({
-    description: 'Creation date of the broadcast',
-    example: '2023-01-01T00:00:00.000Z',
-  })
-  @IsDateString()
-  createdAt: Date;
-
-  @ApiProperty({
-    description: 'Last update date of the broadcast',
-    example: '2023-01-02T00:00:00.000Z',
-  })
-  @IsDateString()
-  updatedAt: Date;
 }

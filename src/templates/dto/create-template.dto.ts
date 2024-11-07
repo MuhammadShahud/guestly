@@ -25,14 +25,16 @@ class TemplateHeaderDto {
   })
   @IsString()
   @IsEnum(TemplateContentTypeEnum)
-  content_type: string;
+  @IsOptional()
+  content_type?: string;
 
   @ApiProperty({
     example: 'Header content',
     description: 'The content value of the header',
   })
   @IsString()
-  content_value: string;
+  @IsOptional()
+  content_value?: string;
 }
 
 class TemplateButtonDto {
@@ -44,11 +46,13 @@ class TemplateButtonDto {
   })
   @IsString()
   @IsEnum(TemplateButtonTypeEnum)
-  type: string;
+  @IsOptional()
+  type?: string;
 
   @ApiProperty({ example: 'Click me', description: 'The text of the button' })
   @IsString()
-  text: string;
+  @IsOptional()
+  text?: string;
 
   @ApiProperty({
     example: 'http://example.com',
@@ -63,7 +67,8 @@ class TemplateButtonDto {
 class BodyVariableDto {
   @ApiProperty({ example: 'var1', description: 'The name of the variable' })
   @IsString()
-  variable_name: string;
+  @IsOptional()
+  variable_name?: string;
 
   @ApiProperty({
     example: 'defaultValue',
@@ -81,7 +86,8 @@ export class CreateTemplateDto {
     description: 'The name of the template',
   })
   @IsString()
-  readonly name: string;
+  @IsOptional()
+  readonly name?: string;
 
   @IsEnum(TemplateCategoryEnum)
   @ApiProperty({
@@ -91,12 +97,14 @@ export class CreateTemplateDto {
     enumName: 'TemplateCategoryEnum',
   })
   @IsString()
-  readonly category: string;
+  @IsOptional()
+  readonly category?: string;
 
   @ApiProperty({ example: 'en', description: 'The language of the template' })
   @IsString()
   @IsEnum(TemplateLanguage)
-  readonly language: string;
+  @IsOptional()
+  readonly language?: string;
 
   @ApiProperty({
     description: 'The header of the template',
@@ -116,6 +124,7 @@ export class CreateTemplateDto {
   @IsOptional()
   @IsString()
   readonly raw_html_body?: string;
+
   @ApiProperty({
     description: 'The body variables of the template',
     required: false,
@@ -161,11 +170,11 @@ export class CreateTemplateDto {
   readonly business?: string;
 
   @ApiProperty({
-    example: 'PENDING',
+    example: TemplateStatusEnum.DRAFT,
     description: 'The status of the template',
     enum: TemplateStatusEnum,
     enumName: 'TemplateStatusEnum',
-    required: false,
+    default: TemplateStatusEnum.DRAFT,
   })
   @IsOptional()
   @IsEnum(TemplateStatusEnum)

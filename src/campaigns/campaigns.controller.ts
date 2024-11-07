@@ -51,7 +51,6 @@ export class CampaignController {
     name: 'name',
     required: false,
     type: String,
-    example: 'Promo Campaign',
   })
   @ApiQuery({
     name: 'status',
@@ -60,24 +59,20 @@ export class CampaignController {
     example: CampaignStatus.DRAFT,
     enum: Object.keys(CampaignStatus),
   })
-  @ApiQuery({ name: 'language', required: false, type: String, example: 'en' })
   @ApiQuery({
     name: 'template',
     required: false,
     type: String,
-    example: '60dfef1e2a3f2c1b7d4df13a',
   })
   @ApiQuery({
     name: 'contact_segment',
     required: false,
     type: String,
-    example: '60dfef1e2a3f2c1b7d4df13b',
   })
   @ApiQuery({
     name: 'business',
     required: false,
     type: String,
-    example: '60dfef1e2a3f2c1b7d4df13c',
   })
   //   @ApiQuery({
   //     name: 'createdAtFrom',

@@ -25,6 +25,8 @@ export enum TemplateButtonTypeEnum {
 
 export enum TemplateStatusEnum {
   PENDING = 'PENDING',
+  DRAFT = 'DRAFT',
+  SUBMITTED = 'SUBMITTED',
   REJECTED = 'REJECTED',
   APPROVED = 'APPROVED',
   IN_APPEAL = 'IN_APPEAL',

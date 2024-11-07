@@ -67,7 +67,7 @@ export class CampaignTemplateDto {
   language: string;
 
   @ApiProperty({
-    description: 'Mark template as defaultl',
+    description: 'Mark template as default',
     example: 'false',
   })
   @IsBoolean()
@@ -78,6 +78,7 @@ export class CampaignTemplateDto {
     type: [CampaignBodyVariableDto],
   })
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CampaignBodyVariableDto)
   body_variables: CampaignBodyVariableDto[];
@@ -89,7 +90,7 @@ export class CreateCampaignDto {
     example: 'Summer Promo Campaign',
   })
   @IsString()
-  @IsNotEmpty({ message: 'Please provide a name' })
+  @IsOptional() // Made optional
   name: string;
 
   @ApiProperty({
@@ -99,6 +100,7 @@ export class CreateCampaignDto {
   })
   @IsArray()
   @IsString({ each: true })
+  @IsOptional() // Made optional
   contact_segments: string[];
 
   @ApiProperty({
@@ -109,6 +111,7 @@ export class CreateCampaignDto {
   @ValidateNested({ each: true })
   @Validate(OneDefaultTemplateValidator)
   @Type(() => CampaignTemplateDto)
+  @IsOptional() // Made optional
   templates: CampaignTemplateDto[];
 
   @ApiProperty({
@@ -116,7 +119,7 @@ export class CreateCampaignDto {
     example: '60dfef1e2a3f2c1b7d4df13c',
   })
   @IsMongoId()
-  @IsNotEmpty({ message: 'Business id is required' })
+  @IsOptional() // Made optional
   business: string;
 
   @ApiProperty({
@@ -135,6 +138,6 @@ export class CreateCampaignDto {
   })
   @ValidateNested()
   @Type(() => CampaignSchedulingDto)
-  @IsNotEmpty({ message: 'Scheduling is required' })
+  @IsOptional() // Made optional
   scheduling: CampaignSchedulingDto;
 }

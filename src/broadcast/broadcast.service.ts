@@ -14,6 +14,7 @@ import { IBroadcast } from './interfaces/broadcast.interface';
 import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { BookingService } from 'src/booking/booking.service';
+import { BroadcastStatus } from './enum/broadcast.enum';
 
 @Injectable()
 export class BroadcastService implements OnModuleInit {
@@ -30,39 +31,41 @@ export class BroadcastService implements OnModuleInit {
   async create(createBroadcastDto: CreateBroadcastDto): Promise<IBroadcast> {
     const broadcast = new this.broadcastModel(createBroadcastDto);
 
-    const bookings = await this.bookingService.getBookingsByFilter({
-      _id: { $in: broadcast.bookings },
-    });
+    if (broadcast.status == BroadcastStatus.SCHEDULED) {
+      const bookings = await this.bookingService.getBookingsByFilter({
+        _id: { $in: broadcast.bookings },
+      });
 
-    const contacts = bookings.map((a) => a.mainGuest);
+      const contacts = bookings.map((a) => a.mainGuest);
 
-    for (let i = 0; i < contacts.length; i++) {
-      const contact = contacts[i];
+      for (let i = 0; i < contacts.length; i++) {
+        const contact = contacts[i];
 
-      const template = broadcast.templates.find(
-        (t) => t.language == contact.language,
-      );
+        const template = broadcast.templates.find(
+          (t) => t.language == contact.language,
+        );
 
-      const default_template = broadcast.templates.find(
-        (t) => t.is_default == true,
-      );
+        const default_template = broadcast.templates.find(
+          (t) => t.is_default == true,
+        );
 
-      console.log(template, default_template);
+        console.log(template, default_template);
 
-      await this.broadcastQueue.add(
-        'send',
-        {
-          contact: contact._id,
-          template: template ? template : default_template,
-          business: broadcast.business,
-        },
-        {
-          attempts: 3,
-          delay: 2000,
-          removeOnComplete: true,
-          removeOnFail: false,
-        },
-      );
+        await this.broadcastQueue.add(
+          'send',
+          {
+            contact: contact._id,
+            template: template ? template : default_template,
+            business: broadcast.business,
+          },
+          {
+            attempts: 3,
+            delay: 2000,
+            removeOnComplete: true,
+            removeOnFail: false,
+          },
+        );
+      }
     }
 
     return broadcast.save();
