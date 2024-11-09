@@ -77,12 +77,12 @@ const TemplateSchema = new Schema(
     },
     name: {
       type: String,
-      required: [true, 'Please provide a name'],
+      // required: [true, 'Please provide a name'],
       trim: true,
     },
     category: {
       type: String,
-      required: [true, 'Please provide a category'],
+      // required: [true, 'Please provide a category'],
       enum: {
         values: Object.values(TemplateCategoryEnum),
         message: `{VALUE} is not supported.`,
@@ -94,7 +94,7 @@ const TemplateSchema = new Schema(
         values: Object.values(TemplateLanguage),
         message: `{VALUE} is not supported.`,
       },
-      required: [true, 'Please provide a language'],
+      // required: [true, 'Please provide a language'],
     },
     header: {
       type: TemplateHeader,
@@ -119,7 +119,7 @@ const TemplateSchema = new Schema(
     business: {
       type: Schema.Types.ObjectId,
       ref: 'Buisness',
-      required: [true, 'business id are required'],
+      // required: [true, 'business id are required'],
     },
     status: {
       type: String,
@@ -127,7 +127,7 @@ const TemplateSchema = new Schema(
         values: Object.values(TemplateStatusEnum),
         message: `{VALUE} is not supported.`,
       },
-      default: 'PENDING',
+      default: TemplateStatusEnum.DRAFT,
     },
   },
   { timestamps: true },

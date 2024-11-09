@@ -24,7 +24,6 @@ export class ConditionDto {
     example: '18', // Example value
   })
   @IsString()
-  @IsNotEmpty()
   value: string;
 
   @ApiProperty({
