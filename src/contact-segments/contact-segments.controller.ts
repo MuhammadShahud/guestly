@@ -80,8 +80,7 @@ export class ContactSegmentsController {
   async getContactsForSegements(
     @Body() filters: Partial<CreateContactSegmentDto>,
     @GetUser() user: IUser,
-  ) {
-    console.log(user, 'user');
+  ) { 
     // console.log('it was in the controller');
     return await this.contactSegmentsService.getContactsForSegements(
       filters,

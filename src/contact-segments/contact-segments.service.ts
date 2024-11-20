@@ -133,6 +133,11 @@ export class ContactSegmentsService {
       return mongocondtion;
     }
 
+
+    if(operator == "is blank"){
+      return { $or: [{ [attribute]:{$eq:null} }, { [attribute]:{$exists: false} }] };
+    }
+
     const mongoOperator = this.operatorSelector(operator);
     if (
       mongoOperator === '$exists: true' ||
@@ -162,10 +167,11 @@ export class ContactSegmentsService {
       return mongocondtion;
     }
 
+
     const mongocondtion = {
       [attribute]: { [mongoOperator]: value },
     };
-    // console.log(mongocondtion, '=========');
+    console.log(mongocondtion, '=========');
     return mongocondtion;
   }
 
@@ -198,6 +204,7 @@ export class ContactSegmentsService {
       condition.conditions.forEach((condition: ConditionDto) => {
         const { attribute, operator, value } = condition;
         const query = this.queryBuilder(attribute, operator, value);
+        console.log(query);
         orArray[index]['$and'].push(query);
       });
     });
@@ -219,6 +226,7 @@ export class ContactSegmentsService {
       condition.conditions.forEach((condition: ConditionDto) => {
         const { attribute, operator, value } = condition;
         const query = this.queryBuilder(attribute, operator, value);
+        console.log(query);
         orArray[index]['$and'].push(query);
       });
     });
