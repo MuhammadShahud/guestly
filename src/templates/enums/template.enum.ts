@@ -1,7 +1,7 @@
 export enum TemplateCategoryEnum {
   MARKETING = 'MARKETING',
   // AUTHENTICATION = 'AUTHENTICATION',
-  // UTILITY = 'UTILITY',
+  UTILITY = 'UTILITY',
 }
 
 export enum TemplateContentTypeEnum {
