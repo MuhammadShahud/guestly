@@ -57,7 +57,7 @@ export class WhatsappService {
     `${this.configService.get('FACEBOOK_URL')}/${template_id}`;
 
   private createMessageURL = (phone_id: string) =>
-    `${this.configService.get('FACEBOOK_URL')}/${phone_id}`;
+    `${this.configService.get('FACEBOOK_URL')}/${phone_id}/messages`;
 
   private createTemplate = async (t: ITemplate) => {
     const regex = /{{\s*(.*?)\s*}}/g;
