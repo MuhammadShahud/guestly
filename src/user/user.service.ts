@@ -432,7 +432,7 @@ export class UserService {
       params,
     );
 
-    if (!!error)
+    if (!!error) 
       throw new BadRequestException({
         message: error.message,
         code: 'bad_request',
@@ -1056,6 +1056,7 @@ export class UserService {
       phoneNumber: WA_number.display_phone_number,
       codeVerificationStatus: WA_number.code_verification_status,
       qualityRating: WA_number.quality_rating,
+      whatsappAccessToken: token,
       phoneNumberId: WA_number.id,
       logo: WA_profile['profile_picture_url'],
       description: WA_profile['description'],

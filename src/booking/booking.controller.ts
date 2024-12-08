@@ -57,7 +57,6 @@ export class BookingController {
       status,
     );
   }
-  
   @AuthDecorator(USER_ROLE.SUPER_ADMIN)
   @Get(':id')
   findOne(@Param('id') id: string) {

@@ -39,6 +39,7 @@ import { BroadcastModule } from './broadcast/broadcast.module';
 import { BullModule } from '@nestjs/bull';
 import { ShortenUrlGeneratorModule } from './shorten-url-generator/shorten-url-generator.module';
 import { ContactUsModule } from './contact-us/contact-us.module';
+import { PMSModule } from './pms/pms.module';
 
 const envFilePath: string = join(
   __dirname,
@@ -91,6 +92,7 @@ console.log(envFilePath);
     WhatsappModule,
     ShortenUrlGeneratorModule,
     ContactUsModule,
+    PMSModule,
   ],
   controllers: [AppController],
   providers: [

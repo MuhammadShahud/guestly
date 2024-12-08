@@ -41,3 +41,13 @@ export class LoginDto {
   @IsString()
   lang: string;
 }
+
+export class LoginAsBusinessDto {
+  @ApiProperty({
+    description: 'unique email of the user',
+    default: 'test@yopmail.com',
+  })
+  @IsNotEmpty({ message: 'Please provide email' })
+  @IsEmail()
+  email: string;
+}

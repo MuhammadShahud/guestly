@@ -127,7 +127,7 @@ export class UserController {
   async getCode(@Param('code') code: string, @GetUser() user: IUser) {
     console.log(code, '=============');
     const codeResponse = await this.userService.getCode(code);
-
+    console.log(codeResponse?.response['access_token']);
     return await this.userService.getMetaWhatsappAccId(
       codeResponse?.response['access_token'],
       user,
