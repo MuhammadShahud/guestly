@@ -40,6 +40,7 @@ import { BullModule } from '@nestjs/bull';
 import { ShortenUrlGeneratorModule } from './shorten-url-generator/shorten-url-generator.module';
 import { ContactUsModule } from './contact-us/contact-us.module';
 import { PMSModule } from './pms/pms.module';
+import { PmsWebhookModule } from './pms-webhook/pms-webhook.module';
 
 const envFilePath: string = join(
   __dirname,
@@ -93,6 +94,7 @@ console.log(envFilePath);
     ShortenUrlGeneratorModule,
     ContactUsModule,
     PMSModule,
+    PmsWebhookModule,
   ],
   controllers: [AppController],
   providers: [

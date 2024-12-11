@@ -58,7 +58,11 @@ async function bootstrap() {
   app.use('/admin/queues', serverAdapter.getRouter());
 
   // global prefix setup
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', {
+    exclude: [
+      '/rest/external-api/bookings/import',
+    ],
+  });
 
   app.setViewEngine('ejs');
 

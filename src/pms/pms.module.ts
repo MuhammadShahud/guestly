@@ -10,6 +10,7 @@ import { PMS } from './pms.entity';
   imports: [MongooseModule.forFeature([{ name: 'pms',schema: PMS }])],
   providers: [PMSService],
   controllers: [PMSController],
+  exports: [PMSService],
 })
 export class PMSModule {}
  

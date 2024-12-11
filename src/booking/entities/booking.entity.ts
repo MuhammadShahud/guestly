@@ -47,7 +47,13 @@ const BookingSchema = new Schema(
     status: {
       type: String,
       enum: {
-        values: ['CONFIRMED', 'CHECKED-IN', 'CHECKED-OUT', 'CANCELLED'],
+        values: [
+          'CONFIRMED',
+          'CHECKED-IN',
+          'CHECKED-OUT',
+          'CANCELLED',
+          'BOOKED',
+        ],
         message: `{VALUE} is not supported.`,
       },
       default: 'CHECKED-IN',

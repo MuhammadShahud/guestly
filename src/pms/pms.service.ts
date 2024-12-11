@@ -40,4 +40,9 @@ export class PMSService {
     }
     return pms;
   }
+
+  async findByApiUsername(username: string): Promise<PMS> {
+    console.log(username)
+    return this.pmsModel.findOne({ username, status: 'active' });
+  }
 }

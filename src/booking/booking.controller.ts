@@ -17,7 +17,7 @@ import { GetUser } from 'src/common/decorators/user.decorater';
 import { IUser } from 'src/user/interfaces/user.interface';
 import { pagination } from 'src/common/interface/pagination';
 import { SwaggerDecorator } from 'src/common/decorators/api-decorater';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto, UpdateCommentDto } from './dto/create-comment.dto';
 @ApiTags('bookings')
 @Controller('booking')
