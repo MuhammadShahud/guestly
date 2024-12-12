@@ -47,7 +47,13 @@ const BookingSchema = new Schema(
     status: {
       type: String,
       enum: {
-        values: ['CONFIRMED', 'CHECKED-IN', 'CHECKED-OUT', 'CANCELLED'],
+        values: [
+          'CONFIRMED',
+          'CHECKED-IN',
+          'CHECKED-OUT',
+          'CANCELLED',
+          'BOOKED',
+        ],
         message: `{VALUE} is not supported.`,
       },
       default: 'CHECKED-IN',
@@ -113,6 +119,19 @@ const BookingSchema = new Schema(
     },
     comments: {
       type: [CommentSchema],
+      default: [],
+    },
+
+    checkin_messages: {
+      type: [String],
+      default: [],
+    },
+    checkout_messages: {
+      type: [String],
+      default: [],
+    },
+    during_messages: {
+      type: [String],
       default: [],
     },
   },

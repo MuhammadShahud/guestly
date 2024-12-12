@@ -306,6 +306,12 @@ export class AuthService {
     return await this.createSignToken(user);
   }
 
+  async loginAsBusiness(  email: string) {
+    const user = await this.userService.findUser(email);
+    if (!user) throw new BadRequestException('User not found');
+    return await this.createSignToken(user);
+  }
+
   async confirmLogin(confirmLoginDto: ConfirmLoginDto) {
     const { email, code } = confirmLoginDto;
 

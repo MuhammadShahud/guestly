@@ -20,10 +20,7 @@ export class ChatService {
     private readonly apiService: ApiService,
   ) {}
 
-  async initializeChat(
-    user: string,
-    contact: IContact,
-  ): Promise<{ data: IRoom }> {
+  async initializeChat(user: string, contact: string): Promise<IRoom> {
     const message = {
       lastMessage: null,
       lastChatted: null,
@@ -35,21 +32,21 @@ export class ChatService {
 
     const room = await this.Room.findOne({
       business,
-      contact: contact._id,
+      contact: contact,
       user: _user._id,
     });
 
     if (room) {
-      return { data: room as IRoom };
+      return room;
     }
     const newRoom = await this.Room.create({
       business,
       user: _user._id,
-      contact: contact._id,
+      contact: contact,
       message,
     });
 
-    return { data: newRoom as IRoom };
+    return newRoom;
   }
 
   async sendMessageOnWhatsApp(message: string, type: string, roomId: string) {
@@ -61,7 +58,7 @@ export class ChatService {
       this.ToolsAndIntegration.findOne({ business: room.buisness }),
     ]);
 
-    console.log(contact.phoneNo)
+    console.log(contact.phoneNo);
     const [err, response] = await this.apiService.postApi(
       'https://graph.facebook.com/v20.0/112084118643124/messages',
       {
@@ -79,7 +76,8 @@ export class ChatService {
       },
     );
 
-    if (err) throw new BadGatewayException('Failed to send message' , err.message);
+    if (err)
+      throw new BadGatewayException('Failed to send message', err.message);
 
     const [chat, updatedRoom] = await Promise.all([
       this.Chat.create({
@@ -119,29 +117,10 @@ export class ChatService {
     return { rooms, totalRooms };
   }
 
-  async createChat(
-    roomId: string,
-    type: string,
-    message: string,
-    isForwarded: boolean,
-    user: string,
-    contact: string,
-  ) {
-    console.log(roomId);
+  async createChat(message: IChat) {
     await Promise.all([
-      this.Chat.create({
-        message: {
-          message,
-          isForwarded,
-          type: type,
-        },
-        user: user,
-        contact: contact,
-        room: roomId,
-        from: contact,
-        to: user,
-      }),
-      this.Room.findByIdAndUpdate(roomId, {
+      this.Chat.create(message),
+      this.Room.findByIdAndUpdate(message.room, {
         message: {
           lastMessage: message,
           lastChatted: new Date(),

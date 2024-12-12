@@ -3,15 +3,11 @@ import {
   ExecutionContext,
   SetMetadata,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { IUser } from 'src/user/interfaces/user.interface';
 
-export const GetUser = createParamDecorator(
-  (data, ctx: ExecutionContext): IUser => {
-    const request: Request = ctx.switchToHttp().getRequest();
-    return request.user as IUser;
-  },
-);
+export const GetUser = createParamDecorator((data, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest();
+  return request.user;
+});
 
 export const Permissions = (...permissions: string[]) =>
   SetMetadata('permissions', permissions);

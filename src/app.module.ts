@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { DatabaseModule } from './common/database/database.module';
 import { LoggerMiddleware } from './utils/logger.middleware';
@@ -32,6 +32,15 @@ import { ChatModule } from './chat/chat.module';
 import { UtilsWhatsAppService } from './utils/utils.whatsapp';
 import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { S3Storage } from './utils/utils.s3';
+import { TemplatesModule } from './templates/templates.module';
+import { ScheduledMessagesModule } from './scheduled-messages/scheduled-messages.module';
+import { CampaignsModule } from './campaigns/campaigns.module';
+import { BroadcastModule } from './broadcast/broadcast.module';
+import { BullModule } from '@nestjs/bull';
+import { ShortenUrlGeneratorModule } from './shorten-url-generator/shorten-url-generator.module';
+import { ContactUsModule } from './contact-us/contact-us.module';
+import { PMSModule } from './pms/pms.module';
+import { PmsWebhookModule } from './pms-webhook/pms-webhook.module';
 
 const envFilePath: string = join(
   __dirname,
@@ -44,6 +53,17 @@ console.log(envFilePath);
 
 @Module({
   imports: [
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6380),
+          password: configService.get<string>('REDIS_PASSWORD'), // Optional
+        },
+      }),
+      inject: [ConfigService],
+    }),
     // SentryModule.forRoot(),
     ConfigModule.forRoot({
       // envFilePath
@@ -66,7 +86,15 @@ console.log(envFilePath);
     TasksModule,
     ContactSegmentsModule,
     ChatModule,
+    TemplatesModule,
+    ScheduledMessagesModule,
+    CampaignsModule,
+    BroadcastModule,
     WhatsappModule,
+    ShortenUrlGeneratorModule,
+    ContactUsModule,
+    PMSModule,
+    PmsWebhookModule,
   ],
   controllers: [AppController],
   providers: [
