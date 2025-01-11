@@ -1,17 +1,18 @@
-import { Module } from '@nestjs/common';
-import { ChatService } from './chat.service';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ChatService } from './chat.service';
+import { ChatGateway } from './chat.gateway';
 import { chatSchema } from './entities/chat.entity';
 import { UserSchema } from 'src/user/user.entity';
 import { contactSchema } from 'src/contacts/entities/contact.entity';
 import { ToolsAndIntegration } from 'src/tools-integrations/tools-integration.entity';
 import { RoomSchema } from './entities/room.entity';
 import { ApiService } from 'src/utils/apiServise';
-import { ChatGateway } from './chat.gateway';
 import { RoomController } from './room.controller';
 import { RoomService } from './room.service';
 import { MessageService } from './message.service';
 import { MessageController } from './message.controller';
+import { WhatsappModule } from 'src/whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -22,15 +23,16 @@ import { MessageController } from './message.controller';
       { name: 'Contacts', schema: contactSchema },
       { name: 'Tools-Integration', schema: ToolsAndIntegration },
     ]),
+    forwardRef(() => WhatsappModule),
   ],
   controllers: [RoomController, MessageController],
   providers: [
     ChatService,
-    ApiService,
     ChatGateway,
+    ApiService,
     RoomService,
     MessageService,
   ],
-  exports: [ChatService, RoomService, MessageService, RoomService],
+  exports: [ChatService, ChatGateway, RoomService, MessageService],
 })
 export class ChatModule {}

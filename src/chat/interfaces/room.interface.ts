@@ -13,7 +13,7 @@ export interface IRoom extends Document {
   user : IUser;
   contact : IContact;
   message: Message;
-  buisness: IBuisness;
+  business: IBuisness;
   status: 'open' | 'close';
   media: string[];
 }

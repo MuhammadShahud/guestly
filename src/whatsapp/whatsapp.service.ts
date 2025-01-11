@@ -30,6 +30,7 @@ import { MessageService } from 'src/chat/message.service';
 import { RoomService } from 'src/chat/room.service';
 import { MessageType } from 'src/chat/enums/messge.enum';
 import { IChat } from 'src/chat/interfaces/chat.interface';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Injectable()
 export class WhatsappService {
@@ -46,8 +47,11 @@ export class WhatsappService {
     private readonly bookingService: BookingService,
     @Inject(forwardRef(() => TemplateService))
     private readonly templateService: TemplateService,
+    @Inject(forwardRef(() => MessageService))
     private readonly messageService: MessageService,
+    @Inject(forwardRef(() => RoomService))
     private readonly roomService: RoomService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   private createTemplateURL = (wab_id: string) =>
@@ -276,6 +280,12 @@ export class WhatsappService {
               }
 
               await newMessage.save();
+
+              await this.chatGateway.sendMessageToRoom(
+                _business.owner._id,
+                newMessage,
+              );
+
             }
           }
 
@@ -517,6 +527,7 @@ export class WhatsappService {
     const room = await this.roomService.getRoomByFilter({
       _id: message.room,
     });
+    console.log(room)
 
     if (!room) {
       throw new Error('Room not found.');
@@ -530,12 +541,12 @@ export class WhatsappService {
       throw new Error('Contact not found.');
     }
 
-    const business = await this.buisnessService.getBuisnessById(
-      String(room.buisness),
-    );
-
+    // const business = await this.buisnessService.getBuisnessById(
+    //   String(room.buisness),
+    // );
+ 
     const toolsNIn = await this.toolsAndIntegration.getTandIFn({
-      buisness: String(room.buisness),
+      buisness: room.business,
     });
 
     let w_message: TMessage = {

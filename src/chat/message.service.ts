@@ -6,6 +6,8 @@ import { FilterMessagesDto } from './dto/filter-messages.dto';
 import { IChat } from './interfaces/chat.interface';
 import { ChatService } from './chat.service';
 import { RoomService } from './room.service';
+import { ChatGateway } from './chat.gateway';
+import { WhatsappService } from 'src/whatsapp/whatsapp.service';
 
 @Injectable()
 export class MessageService {
@@ -13,6 +15,8 @@ export class MessageService {
     @InjectModel('Chat') private readonly chatModel: Model<IChat>,
     private readonly chatService: ChatService,
     private readonly roomService: RoomService,
+    private readonly chatGateway: ChatGateway,
+    private readonly whatsappService: WhatsappService,
   ) {}
 
   async create(docs): Promise<IChat> {
@@ -47,14 +51,37 @@ export class MessageService {
         },
       });
 
-      await this.chatService.sendMessageOnWhatsApp(
-        newMessage.message.message,
-        newMessage.message.type,
-        newMessage.room,
+      await newMessage.save();
+
+      await newMessage.populate([
+        // {
+        //   path: 'user',
+        //   select: '_id name image',
+        //   model: 'User',
+        // },
+        {
+          path: 'contact',
+          select: '_id name phoneNo',
+          model: 'Contacts',
+        },
+        {
+          path: 'room',
+          select: '_id',
+          model: 'Room',
+        },
+      ]);
+
+
+      await this.chatGateway.sendMessageToRoom(
+        newMessage.user._id.toString(),
+        newMessage,
       );
 
-      return newMessage.save();
+      await this.whatsappService.sendMessageByType(newMessage._id.toString());
+
+      return newMessage;
     } catch (e) {
+      console.log(e);
       throw new Error(`Error Sending message, ${e['message']}`);
     }
   }

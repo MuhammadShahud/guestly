@@ -14,6 +14,7 @@ import { BullAdapter } from '@bull-board/api/bullAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { Queue } from 'bull';
 import { getQueueToken } from '@nestjs/bull';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 declare const module: any;
 
@@ -72,6 +73,8 @@ async function bootstrap() {
     module.hot.dispose(() => app.close());
   }
   setupSwagger(app);
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   const PORT = await configService.get('PORT');
 

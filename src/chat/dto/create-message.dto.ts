@@ -109,6 +109,7 @@ export class CreateMessageDto {
     message: 'Audio URL is required for audio type',
   })
   @IsUrl()
+  @IsOptional()
   audioUrl?: string;
 
   @ApiProperty({
@@ -119,6 +120,7 @@ export class CreateMessageDto {
     message: 'Video URL is required for video type',
   })
   @IsUrl()
+  @IsOptional()
   videoUrl?: string;
 
   @ApiProperty({
@@ -129,5 +131,6 @@ export class CreateMessageDto {
     message: 'Caption is required for video type',
   })
   @IsString()
+  @IsOptional()
   caption?: string;
 }

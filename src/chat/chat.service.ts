@@ -55,7 +55,7 @@ export class ChatService {
 
     const [contact, TAndI] = await Promise.all([
       this.Contacts.findById(room.contact),
-      this.ToolsAndIntegration.findOne({ business: room.buisness }),
+      this.ToolsAndIntegration.findOne({ business: room.business }),
     ]);
 
     console.log(contact.phoneNo);

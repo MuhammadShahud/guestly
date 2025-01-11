@@ -12,7 +12,7 @@ const RoomSchema = new Schema({
   },
   contact: {
     type: Types.ObjectId,
-    ref: 'User',
+    ref: 'Contacts',
   },
   message: {
     lastMessage: { type: String, default: null },

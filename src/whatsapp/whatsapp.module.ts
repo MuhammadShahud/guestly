@@ -19,7 +19,7 @@ import { TemplatesModule } from 'src/templates/templates.module';
     AuthModule,
     ContactsModule,
     ToolsIntegrationsModule,
-    ChatModule,
+    forwardRef(() => ChatModule),
     BuisnessModule,
     OrganizationModule,
     BookingModule,
