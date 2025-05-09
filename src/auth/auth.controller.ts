@@ -13,7 +13,7 @@ import { ChangePasswordDto } from './dto/changePassword.dto';
 import { ConfirmLoginDto } from './dto/confirm-login-dto';
 import { CreateAdminDto } from './dto/create-admin-dto';
 import { ForgetPasswordDto } from './dto/forget-password-dto';
-import { LoginDto } from './dto/login-dto';
+import { LoginAsBusinessDto, LoginDto } from './dto/login-dto';
 import { ResetOtpDto } from './dto/resend-otp-dto';
 import { VerifyOtp } from './dto/verify-otp-dto';
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
@@ -30,6 +30,12 @@ export class AuthController {
   @Post('owner-signup')
   async ownerSignup(@Body() creatteUserDto: CreateUserDto) {
     return await this.authService.ownerSignup(creatteUserDto);
+  }
+
+  @SwaggerDecorator('login api for admin to login as the buisness')
+  @Post('login-as-business')
+  async loginAsBusiness(@Body() loginAsBusinessDto: LoginAsBusinessDto) {
+    return await this.authService.loginAsBusiness(loginAsBusinessDto.email);
   }
 
   @SwaggerDecorator('login api for the buisness')

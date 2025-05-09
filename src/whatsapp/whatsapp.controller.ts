@@ -4,9 +4,7 @@ import { WhatsappService } from './whatsapp.service';
 
 @Controller('whatsapp')
 export class WhatsappController {
-  constructor(
-    private readonly whatsappService: WhatsappService,
-  ) {}
+  constructor(private readonly whatsappService: WhatsappService) {}
   @Get('webhook-test')
   async testHello(
     @Query('hub.mode') mode: string,
@@ -17,6 +15,7 @@ export class WhatsappController {
   }
   @Post('webhook-test')
   async handleWebhook(@Req() request: Request) {
+    console.log(request.body);
     await this.whatsappService.handleWhatsAppWebHook(request);
     return { message: 'webhook worked' };
   }

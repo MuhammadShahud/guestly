@@ -1,5 +1,6 @@
 import { Document } from 'mongoose';
 import { IBuisness } from 'src/buisness/interface/buisness.interface';
+import { IContact } from 'src/contacts/interface/contact.interface';
 import { IUser } from 'src/user/interfaces/user.interface';
 
 type Comment = {
@@ -7,8 +8,8 @@ type Comment = {
   comment: string;
 };
 export interface IBooking extends Document {
-  mainGuest: IUser;
-  additionalGuests: IUser[];
+  mainGuest: IContact;
+  additionalGuests: IContact[];
   checkIn: Date;
   checkOut: Date;
   status: 'CONFIRMED' | 'CHECKED-IN' | 'CHECKED-OUT' | 'CANCELLED';
@@ -27,4 +28,7 @@ export interface IBooking extends Document {
   source: 'PMS' | 'WA' | 'User';
   bussiness: IBuisness;
   comments: Comment[];
+  checkin_messages: String[];
+  checkout_messages: String[];
+  during_messages: String[];
 }

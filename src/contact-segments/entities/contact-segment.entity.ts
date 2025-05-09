@@ -12,7 +12,7 @@ const conditionSchema = new Schema(
     },
     value: {
       type: String,
-      required: [true, 'Condition value is required'],
+      // required: [true, 'Condition value is required'],
     },
     conditionStatus: {
       type: String,

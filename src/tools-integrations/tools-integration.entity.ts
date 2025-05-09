@@ -33,6 +33,10 @@ const Whatsapp = new Schema({
     type: String,
     default: null,
   },
+  whatsappAccessToken: {
+    type: String,
+    default: null,
+  },
   phoneNumber: {
     type: String,
     default: null,

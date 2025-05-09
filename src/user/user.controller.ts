@@ -38,7 +38,7 @@ import { UpdateInvitedUserDto } from './dto/update-invitedUser.dto';
 @ApiTags('users')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @SwaggerDecorator('to get the login user data', true)
   @Get('get-me')
@@ -124,14 +124,14 @@ export class UserController {
   @SwaggerDecorator('update the login user', true, true, 'code')
   @AuthDecorator(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN)
   @Get('/whatsapp/:code')
-  async getCode(
-    @Param('code') code: string,
-    @GetUser() user: IUser,
-  ) {
-    const codeResponse = await this.userService.getCode(code) as any;
-    return await this.userService.getMetaWhatsappAccId(codeResponse?.response?.access_token, user);
-    // return codeResponse
-
+  async getCode(@Param('code') code: string, @GetUser() user: IUser) {
+    console.log(code, '=============');
+    const codeResponse = await this.userService.getCode(code);
+    console.log(codeResponse?.response['access_token']);
+    return await this.userService.getMetaWhatsappAccId(
+      codeResponse?.response['access_token'],
+      user,
+    );
   }
 
   @ApiExcludeEndpoint()
@@ -189,7 +189,7 @@ export class UserController {
     @GetUser() user: IUser,
     @Param('userId') userId: string,
   ) {
-    console.log(userId, 'userId')
+    console.log(userId, 'userId');
     return await this.userService.deleteInvitedUser(userId, user);
   }
 
@@ -200,7 +200,7 @@ export class UserController {
     @GetUser() user: IUser,
     @Param('userId') userId: string,
   ) {
-    console.log(userId, 'userId')
+    console.log(userId, 'userId');
     return await this.userService.deleteUserFromBuisness(userId, user);
   }
 
@@ -223,14 +223,14 @@ export class UserController {
   @SwaggerDecorator('get meta whatsapp business Acc Id ')
   @Get('get-meta-whatsapp-acc-Id')
   @AuthDecorator(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN)
-  async getMetaWhatsappAccId(@GetUser() user: IUser, @Query('token') token: string) {
+  async getMetaWhatsappAccId(
+    @GetUser() user: IUser,
+    @Query('token') token: string,
+  ) {
     return await this.userService.getMetaWhatsappAccId(token, user);
   }
   // @Get('mailerLite')
   // async mailerLite() {
   //   return await this.userService.mailerLite();
   // }
-
-
-
 }

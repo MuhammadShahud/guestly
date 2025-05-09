@@ -19,7 +19,8 @@ interface IWhatsapp {
   website: string;
   category: Category;
   acessToken: string;
-  phoneNumberId : string
+  phoneNumberId: string;
+  whatappAccountId: string;
 }
 
 export interface IToolsIntegration extends Document {
@@ -29,7 +30,6 @@ export interface IToolsIntegration extends Document {
   whatsapp: IWhatsapp;
   chatIn: ChatIn[];
 }
-
 
 export interface IAllToolsIntegration extends Document {
   name: TYPE;

@@ -9,6 +9,12 @@ import compression from 'compression';
 import chalk from 'chalk';
 import { raw } from 'body-parser';
 import { setupSwagger } from './utils/swagger.config';
+import { createBullBoard } from '@bull-board/api';
+import { BullAdapter } from '@bull-board/api/bullAdapter';
+import { ExpressAdapter } from '@bull-board/express';
+import { Queue } from 'bull';
+import { getQueueToken } from '@nestjs/bull';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 declare const module: any;
 
@@ -32,8 +38,32 @@ async function bootstrap() {
   );
   app.use('/api/v1/package/webhook', raw({ type: 'application/json' }));
 
+  const serverAdapter = new ExpressAdapter();
+  serverAdapter.setBasePath('/admin/queues');
+
+  const broadcastQueue = app.get<Queue>(getQueueToken('broadcast'));
+  const campaignQueue = app.get<Queue>(getQueueToken('campaign'));
+  const scheduledMessagesQueue = app.get<Queue>(
+    getQueueToken('scheduled-messages'),
+  );
+
+  createBullBoard({
+    queues: [
+      new BullAdapter(broadcastQueue),
+      new BullAdapter(campaignQueue),
+      new BullAdapter(scheduledMessagesQueue),
+    ],
+    serverAdapter: serverAdapter,
+  });
+
+  app.use('/admin/queues', serverAdapter.getRouter());
+
   // global prefix setup
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', {
+    exclude: [
+      '/rest/external-api/bookings/import',
+    ],
+  });
 
   app.setViewEngine('ejs');
 
@@ -43,6 +73,8 @@ async function bootstrap() {
     module.hot.dispose(() => app.close());
   }
   setupSwagger(app);
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   const PORT = await configService.get('PORT');
 

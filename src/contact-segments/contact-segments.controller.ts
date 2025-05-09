@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  Request,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ContactSegmentsService } from './contact-segments.service';
 import {
@@ -18,11 +21,12 @@ import { AuthDecorator } from 'src/common/decorators/auth-decorater';
 import { USER_ROLE } from 'src/auth/enums/enums';
 import { GetUser } from 'src/common/decorators/user.decorater';
 import { IUser } from 'src/user/interfaces/user.interface';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { SwaggerDecorator } from 'src/common/decorators/api-decorater';
 import { pagination } from 'src/common/interface/pagination';
+import { AuthGuard } from '@nestjs/passport';
 
-@ApiTags('Contats')
+@ApiTags('Contact Segments')
 @Controller('contact-segments')
 export class ContactSegmentsController {
   constructor(
@@ -59,22 +63,29 @@ export class ContactSegmentsController {
   }
 
   @Get('get-contacts-by-Id/:segmentId')
+  @UseGuards(AuthGuard())
   async getContactsBySegementId(
     @Param('segmentId') segmentId: string,
     @GetUser() user: IUser,
   ) {
     return await this.contactSegmentsService.getContactsBySegementId(
       segmentId,
-      user,
+      user?.currentBuisness?.id,
     );
   }
 
   @Post('get-filtered-records')
+  @ApiBody({ type: CreateContactSegmentDto })
+  @UseGuards(AuthGuard())
   async getContactsForSegements(
     @Body() filters: Partial<CreateContactSegmentDto>,
-  ) {
-    console.log('it was in the controller');
-    return await this.contactSegmentsService.getContactsForSegements(filters);
+    @GetUser() user: IUser,
+  ) { 
+    // console.log('it was in the controller');
+    return await this.contactSegmentsService.getContactsForSegements(
+      filters,
+      user,
+    );
   }
 
   @Delete(':id')

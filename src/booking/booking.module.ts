@@ -15,5 +15,6 @@ import { ContactsService } from 'src/contacts/contacts.service';
   ],
   controllers: [BookingController],
   providers: [BookingService],
+  exports: [BookingService],
 })
 export class BookingModule {}

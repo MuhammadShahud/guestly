@@ -9,10 +9,10 @@ export class ApiService {
     headers: AxiosRequestConfig['headers'],
   ): Promise<[Error, AxiosResponse]> {
     try {
-      const response: AxiosResponse<T> = await axios.post(apiUrl, body, {
+      const response = await axios.post(apiUrl, body, {
         headers,
       });
-      console.log(response.data);
+      console.log(response.data, 'posttttt');
       return [null, response.data as any];
     } catch (error) {
       return [error, null];
@@ -25,15 +25,14 @@ export class ApiService {
     params?: Object,
   ): Promise<[Error, T]> {
     console.log(apiUrl, 'apiUrl');
-    console.log(headers), console.log(params);
     try {
       const response: AxiosResponse<T> = await axios.get(apiUrl, {
         params,
+        headers,
       });
-      console.log(response);
       return [null, response.data];
     } catch (error) {
-      console.log(error.message);
+      console.log(error);
       return [error, null];
     }
   }
